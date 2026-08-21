@@ -28,3 +28,35 @@ The .gitignore file has been set up to provide secret protection.
 The repository for the AI Engineer Journey is in order and is ready to move on to the next stage.
 
 **BUILD → TEST → EXPLAIN → SHARE → IMPROVE**
+
+## Day 2 — AI Concepts & Application Architecture
+
+**Status:** 🟢 Setup Complete
+
+### Completed
+
+- Reviewed previously learned AI concepts
+- Documented AI and Machine Learning
+- Documented Deep Learning and Neural Networks
+- Documented Generative AI and LLMs
+- Documented embeddings
+- Documented vector databases
+- Documented RAG
+- Documented AI agents
+- Documented APIs
+- Documented webhooks
+- Documented basic AI application architecture
+- Documented RAG architecture
+- Documented AI agent architecture
+- Connected the concepts to the upcoming RAG project
+
+### Documentation
+
+- `01-FOUNDATION/DAY-2.md`
+- `NOTES/DAY-2.md`
+
+### Next
+
+Day 3 — AI-assisted coding and debugging practice.
+
+Day 4 — Begin Project 1: RAG Knowledge Assistant.
