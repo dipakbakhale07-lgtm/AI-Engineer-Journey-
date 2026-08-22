@@ -60,3 +60,31 @@ The repository for the AI Engineer Journey is in order and is ready to move on t
 Day 3 — AI-assisted coding and debugging practice.
 
 Day 4 — Begin Project 1: RAG Knowledge Assistant.
+
+## Day 3 — AI-Assisted Coding & Debugging Practice
+
+**Status:** ✅ Complete
+
+### Completed
+
+- Built a Python CSV filtering program
+- Identified input, function, condition and output
+- Debugged a file path error
+- Debugged a function-name error
+- Practiced reading Python traceback messages
+- Completed a JSON data exercise
+- Documented errors, fixes and lessons
+- Documented the Day 3 debugging workflow
+
+### Evidence
+
+- `PRACTISE/csv_filter.py`
+- `PRACTISE/students.csv`
+- `PRACTISE/api_data.json`
+- `PRACTISE/read_json.py`
+- `01-FOUNDATION/DAY-3.md`
+- `NOTES/DAY-3.md`
+
+### Next
+
+Day 4 — Project 1: RAG Knowledge Assistant.
