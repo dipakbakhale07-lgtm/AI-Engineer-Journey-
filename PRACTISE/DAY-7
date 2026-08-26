@@ -1,0 +1,110 @@
+# DAY 7 PRACTICE — RAG Evaluation
+
+## Practice 1 — Explain the Pipeline
+
+Explain this pipeline in your own words:
+
+Question
+→ Embedding
+→ Retrieval
+→ Context
+→ LLM
+→ Answer
+
+---
+
+## Practice 2 — Grounding
+
+What should the RAG assistant do when the retrieved context does not contain the answer?
+
+---
+
+## Practice 3 — Retrieval vs Generation
+
+A question is related to the documents, but the top retrieved chunks do not contain the required evidence.
+
+Is this primarily:
+
+A. A retrieval/source problem
+B. A Python syntax problem
+C. An LLM installation problem
+D. A UI problem
+
+---
+
+## Practice 4 — Why Refusal Matters
+
+Why is it better for a RAG system to say:
+
+"I could not find this information in the provided documents."
+
+instead of generating an answer using general LLM knowledge?
+
+---
+
+## Practice 5 — Prompt Comparison
+
+What was the main difference between Prompt V1 and Prompt V2?
+
+---
+
+## Practice 6 — Evaluation
+
+Your RAG system answers 20 out of 25 evaluation questions correctly.
+
+Calculate the accuracy percentage.
+
+---
+
+## Practice 7 — Failure Analysis
+
+Q21 asks:
+
+"Does using RAG guarantee that an LLM will never hallucinate?"
+
+The retriever returns general RAG information but no explicit evidence about hallucination guarantees.
+
+What should you investigate first?
+
+---
+
+## Practice 8 — Engineering Thinking
+
+Why should we inspect retrieved chunks instead of looking only at the final LLM answer?
+
+---
+
+## Practice 9 — Scenario
+
+Suppose the knowledge base contains information about vector stores but does not define "vector database".
+
+The user asks:
+
+"What is a vector database?"
+
+Should the system invent a definition?
+
+Explain why.
+
+---
+
+## Practice 10 — Key Concept
+
+Complete the statement:
+
+**Relevant topic ≠ ____________.**
+
+---
+
+# Expected Learning
+
+By the end of this practice, I should understand:
+
+- RAG evaluation
+- Grounding
+- Retrieval quality
+- Knowledge-base coverage
+- Faithfulness
+- Failure analysis
+- Prompt comparison
+- Why unsupported answers should be refused

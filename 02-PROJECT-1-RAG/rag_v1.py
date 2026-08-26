@@ -5,7 +5,14 @@ import requests
 from sentence_transformers import SentenceTransformer
 
 
-DOCUMENT_PATH = Path("documents/rag-fundamentals.md")
+# ============================================================
+# CONFIGURATION
+# ============================================================
+
+DOCUMENTS_PATH = Path("documents")
+QUESTIONS_PATH = Path("test-questions.md")
+RESULTS_PATH = Path("baseline_results.md")
+
 EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
@@ -14,13 +21,37 @@ LLM_MODEL = "llama3:latest"
 TOP_K = 3
 
 
-def load_document(file_path: Path) -> str:
-    """Read a UTF-8 Markdown file and return its contents."""
-    if not file_path.exists():
-        raise FileNotFoundError(f"Document not found: {file_path}")
+# ============================================================
+# DOCUMENT LOADING
+# ============================================================
 
-    return file_path.read_text(encoding="utf-8")
+def load_documents(folder_path: Path) -> list[dict]:
+    """Load all Markdown documents from the documents folder."""
 
+    documents = []
+
+    for file_path in sorted(folder_path.glob("*.md")):
+
+        text = file_path.read_text(
+            encoding="utf-8"
+        )
+
+        documents.append({
+            "filename": file_path.name,
+            "text": text,
+        })
+
+    if not documents:
+        raise FileNotFoundError(
+            f"No Markdown documents found in: {folder_path}"
+        )
+
+    return documents
+
+
+# ============================================================
+# CHUNKING
+# ============================================================
 
 def section_based_chunks(text: str) -> list[str]:
     """Split Markdown content using level-2 headings."""
@@ -31,10 +62,13 @@ def section_based_chunks(text: str) -> list[str]:
     current = []
 
     for line in lines:
+
         if line.startswith("## "):
 
             if current:
-                chunks.append("\n".join(current).strip())
+                chunks.append(
+                    "\n".join(current).strip()
+                )
 
             current = [line]
 
@@ -45,54 +79,130 @@ def section_based_chunks(text: str) -> list[str]:
             current.append(line)
 
     if current:
-        chunks.append("\n".join(current).strip())
+        chunks.append(
+            "\n".join(current).strip()
+        )
 
-    return [chunk for chunk in chunks if chunk]
+    return [
+        chunk
+        for chunk in chunks
+        if chunk
+    ]
 
+
+def build_chunk_database(
+    documents: list[dict]
+) -> list[dict]:
+    """Create chunks while preserving source filenames."""
+
+    database = []
+
+    for document in documents:
+
+        chunks = section_based_chunks(
+            document["text"]
+        )
+
+        for chunk in chunks:
+
+            database.append({
+                "filename": document["filename"],
+                "text": chunk,
+            })
+
+    return database
+
+
+# ============================================================
+# SIMILARITY
+# ============================================================
 
 def cosine_similarity(
     query_vector: np.ndarray,
     document_vectors: np.ndarray
 ) -> np.ndarray:
-    """Calculate cosine similarity between query and document vectors."""
+    """Calculate cosine similarity."""
 
-    query_norm = np.linalg.norm(query_vector)
-    document_norms = np.linalg.norm(document_vectors, axis=1)
+    query_norm = np.linalg.norm(
+        query_vector
+    )
 
-    return np.dot(document_vectors, query_vector) / (
+    document_norms = np.linalg.norm(
+        document_vectors,
+        axis=1
+    )
+
+    return np.dot(
+        document_vectors,
+        query_vector
+    ) / (
         document_norms * query_norm
     )
 
 
+# ============================================================
+# CONTEXT
+# ============================================================
+
 def build_context(
-    chunks: list[str],
+    database: list[dict],
     indices: np.ndarray
 ) -> str:
-    """Combine retrieved chunks into one context string."""
+    """Build context from retrieved chunks."""
 
     retrieved_chunks = []
 
     for index in indices:
-        retrieved_chunks.append(chunks[index])
 
-    return "\n\n---\n\n".join(retrieved_chunks)
+        item = database[index]
+
+        retrieved_chunks.append(
+            f"SOURCE FILE: {item['filename']}\n"
+            f"{item['text']}"
+        )
+
+    return "\n\n---\n\n".join(
+        retrieved_chunks
+    )
 
 
-def generate_answer(question: str, context: str) -> str:
-    """Send the grounded prompt to the local Ollama model."""
+# ============================================================
+# LLM — PROMPT V2
+# ============================================================
+
+def generate_answer(
+    question: str,
+    context: str
+) -> str:
+    """Generate a grounded answer using Prompt V2."""
 
     prompt = f"""
-You are a RAG question-answering assistant.
+You are a grounded RAG question-answering assistant.
 
-Answer the user's question using ONLY the provided context.
+Your answer must be based ONLY on the information contained
+in the provided context.
 
-If the answer cannot be found in the provided context,
-say:
+Follow these rules:
+
+1. If the context directly supports the answer,
+   answer the question clearly.
+
+2. If the context contains related information but does
+   not provide enough evidence to answer the specific question,
+   do not fill the gap using outside knowledge.
+
+3. If the required information is not supported by the context,
+   say exactly:
 
 "I could not find this information in the provided documents."
 
-Do not use outside knowledge.
-Do not guess.
+4. Never invent facts, names, dates, numbers, predictions,
+   or explanations that are not supported by the context.
+
+5. Do not treat a related topic as proof of the answer.
+
+6. When possible, mention the source file or section
+   that supports your answer.
 
 CONTEXT:
 {context}
@@ -120,91 +230,450 @@ ANSWER:
     return data["response"].strip()
 
 
-def main() -> None:
+# ============================================================
+# QUESTION EXTRACTION
+# ============================================================
 
-    # 1. Load document
-    text = load_document(DOCUMENT_PATH)
+def extract_questions(
+    file_path: Path
+) -> list[tuple[str, str]]:
+    """Extract Q1-Q25 from test-questions.md."""
 
-    # 2. Create chunks
-    chunks = section_based_chunks(text)
+    text = file_path.read_text(
+        encoding="utf-8"
+    )
 
-    print("=" * 60)
-    print("DOCUMENT")
-    print("=" * 60)
+    lines = text.splitlines()
 
-    print(f"File: {DOCUMENT_PATH.name}")
-    print(f"Characters: {len(text)}")
-    print(f"Chunks: {len(chunks)}")
+    questions = []
 
-    # 3. Load embedding model
-    print("\nLoading embedding model...")
+    current_id = None
+    current_question = []
 
-    model = SentenceTransformer(EMBEDDING_MODEL_NAME)
+    for line in lines:
 
-    # 4. Embed document chunks
-    embeddings = model.encode(chunks)
+        stripped = line.strip()
 
-    print(f"Embedding shape: {embeddings.shape}")
+        if stripped.startswith("## Q"):
 
-    # 5. User question
-    question = "What is RAG?"
+            if current_id and current_question:
 
-    print("\n" + "=" * 60)
-    print("QUESTION")
-    print("=" * 60)
+                questions.append(
+                    (
+                        current_id,
+                        " ".join(
+                            current_question
+                        ).strip()
+                    )
+                )
 
-    print(question)
+            current_id = (
+                stripped
+                .replace("## ", "")
+                .strip()
+            )
 
-    # 6. Embed question
-    query_embedding = model.encode(question)
+            current_question = []
 
-    # 7. Similarity search
+        elif current_id:
+
+            if stripped and not stripped.startswith("#"):
+
+                current_question.append(
+                    stripped
+                )
+
+    if current_id and current_question:
+
+        questions.append(
+            (
+                current_id,
+                " ".join(
+                    current_question
+                ).strip()
+            )
+        )
+
+    return questions
+
+
+# ============================================================
+# RETRIEVAL
+# ============================================================
+
+def retrieve(
+    question: str,
+    model,
+    embeddings: np.ndarray,
+    database: list[dict]
+) -> tuple[np.ndarray, np.ndarray]:
+
+    query_embedding = model.encode(
+        question
+    )
+
     scores = cosine_similarity(
         query_embedding,
         embeddings
     )
 
-    # 8. Rank chunks
-    ranked_indices = np.argsort(scores)[::-1]
+    ranked_indices = np.argsort(
+        scores
+    )[::-1]
 
-    top_indices = ranked_indices[:TOP_K]
+    top_indices = ranked_indices[
+        :TOP_K
+    ]
 
-    # 9. Inspect retrieval
-    print("\n" + "=" * 60)
-    print("RETRIEVED CHUNKS")
-    print("=" * 60)
+    return top_indices, scores
 
-    for rank, index in enumerate(top_indices, start=1):
 
-        print(f"\nRank {rank}")
-        print(f"Similarity: {scores[index]:.4f}")
-        print(f"Chunk ID: rag-{index + 1:03d}")
-        print("-" * 60)
-        print(chunks[index])
+# ============================================================
+# MAIN
+# ============================================================
 
-    # 10. Build context
-    context = build_context(
-        chunks,
-        top_indices
+def main():
+
+    print("=" * 70)
+    print("DAY 7 — RAG EVALUATION")
+    print("=" * 70)
+
+    # --------------------------------------------------------
+    # 1. LOAD DOCUMENTS
+    # --------------------------------------------------------
+
+    documents = load_documents(
+        DOCUMENTS_PATH
     )
 
-    print("\n" + "=" * 60)
-    print("CONTEXT SENT TO LLM")
-    print("=" * 60)
+    print("\nDocuments loaded:")
 
-    print(context)
+    for document in documents:
 
-    # 11. Generate grounded answer
-    print("\n" + "=" * 60)
-    print("LLM ANSWER")
-    print("=" * 60)
+        print(
+            f"- {document['filename']} "
+            f"({len(document['text'])} characters)"
+        )
 
-    answer = generate_answer(
-        question,
-        context
+    # --------------------------------------------------------
+    # 2. CREATE CHUNK DATABASE
+    # --------------------------------------------------------
+
+    database = build_chunk_database(
+        documents
     )
 
-    print(answer)
+    print(
+        f"\nTotal chunks: {len(database)}"
+    )
+
+    # --------------------------------------------------------
+    # 3. LOAD EMBEDDING MODEL
+    # --------------------------------------------------------
+
+    print(
+        "\nLoading embedding model..."
+    )
+
+    model = SentenceTransformer(
+        EMBEDDING_MODEL_NAME
+    )
+
+    # --------------------------------------------------------
+    # 4. CREATE EMBEDDINGS
+    # --------------------------------------------------------
+
+    chunks = [
+        item["text"]
+        for item in database
+    ]
+
+    embeddings = model.encode(
+        chunks
+    )
+
+    print(
+        f"Embedding shape: "
+        f"{embeddings.shape}"
+    )
+
+    # --------------------------------------------------------
+    # 5. LOAD QUESTIONS
+    # --------------------------------------------------------
+
+    questions = extract_questions(
+        QUESTIONS_PATH
+    )
+
+    print(
+        f"Evaluation questions loaded: "
+        f"{len(questions)}"
+    )
+
+    if len(questions) != 25:
+
+        raise ValueError(
+            f"Expected 25 questions, "
+            f"found {len(questions)}"
+        )
+
+    # --------------------------------------------------------
+    # 6. RUN EVALUATION
+    # --------------------------------------------------------
+
+    results = []
+
+    for number, (
+        question_id,
+        question
+    ) in enumerate(
+        questions,
+        start=1
+    ):
+
+        print(
+            "\n" + "=" * 70
+        )
+
+        print(
+            f"{question_id} — "
+            f"{number}/25"
+        )
+
+        print(
+            "=" * 70
+        )
+
+        print(
+            f"\nQUESTION:\n{question}"
+        )
+
+        # ----------------------------------------------------
+        # RETRIEVAL
+        # ----------------------------------------------------
+
+        top_indices, scores = retrieve(
+            question,
+            model,
+            embeddings,
+            database
+        )
+
+        print(
+            "\nRETRIEVED CHUNKS:"
+        )
+
+        retrieved_items = []
+
+        for rank, index in enumerate(
+            top_indices,
+            start=1
+        ):
+
+            item = database[index]
+
+            similarity = float(
+                scores[index]
+            )
+
+            print(
+                f"\nRank {rank}"
+            )
+
+            print(
+                f"Similarity: "
+                f"{similarity:.4f}"
+            )
+
+            print(
+                f"Source: "
+                f"{item['filename']}"
+            )
+
+            print(
+                "-" * 60
+            )
+
+            print(
+                item["text"]
+            )
+
+            retrieved_items.append({
+                "source": item["filename"],
+                "similarity": similarity,
+                "text": item["text"],
+            })
+
+        # ----------------------------------------------------
+        # CONTEXT
+        # ----------------------------------------------------
+
+        context = build_context(
+            database,
+            top_indices
+        )
+
+        print(
+            "\nCONTEXT SENT TO LLM:"
+        )
+
+        print(
+            "-" * 60
+        )
+
+        print(
+            context
+        )
+
+        # ----------------------------------------------------
+        # GENERATION
+        # ----------------------------------------------------
+
+        print(
+            "\nLLM ANSWER:"
+        )
+
+        answer = generate_answer(
+            question,
+            context
+        )
+
+        print(
+            answer
+        )
+
+        # ----------------------------------------------------
+        # STORE RESULT
+        # ----------------------------------------------------
+
+        results.append({
+            "id": question_id,
+            "question": question,
+            "answer": answer,
+            "retrieved": retrieved_items,
+            "context": context,
+        })
+
+    # ========================================================
+    # SAVE RESULTS
+    # ========================================================
+
+    with RESULTS_PATH.open(
+        "w",
+        encoding="utf-8"
+    ) as file:
+
+        file.write(
+            "# RAG V2 — Day 7 Evaluation\n\n"
+        )
+
+        file.write(
+            "This file records the RAG behavior "
+            "using the improved grounding Prompt V2.\n\n"
+        )
+
+        file.write(
+            f"Documents: {len(documents)}\n\n"
+        )
+
+        file.write(
+            f"Total chunks: {len(database)}\n\n"
+        )
+
+        file.write(
+            f"Questions: {len(questions)}\n\n"
+        )
+
+        file.write(
+            "---\n\n"
+        )
+
+        # ----------------------------------------------------
+        # WRITE EACH RESULT
+        # ----------------------------------------------------
+
+        for result in results:
+
+            file.write(
+                f"## {result['id']}\n\n"
+            )
+
+            file.write(
+                f"**Question:** "
+                f"{result['question']}\n\n"
+            )
+
+            # -----------------------------------------------
+            # RETRIEVED SOURCES
+            # -----------------------------------------------
+
+            file.write(
+                "**Retrieved Sources:**\n\n"
+            )
+
+            for item in result["retrieved"]:
+
+                file.write(
+                    f"- {item['source']} — "
+                    f"similarity "
+                    f"{item['similarity']:.4f}\n"
+                )
+
+            # -----------------------------------------------
+            # RETRIEVED CONTEXT
+            # -----------------------------------------------
+
+            file.write(
+                "\n**Retrieved Context:**\n\n"
+            )
+
+            for item in result["retrieved"]:
+
+                file.write(
+                    f"### Source: "
+                    f"{item['source']}\n\n"
+                )
+
+                file.write(
+                    f"{item['text']}\n\n"
+                )
+
+            # -----------------------------------------------
+            # LLM ANSWER
+            # -----------------------------------------------
+
+            file.write(
+                "**LLM Answer:**\n\n"
+            )
+
+            file.write(
+                f"{result['answer']}\n\n"
+            )
+
+            file.write(
+                "---\n\n"
+            )
+
+    # ========================================================
+    # COMPLETE
+    # ========================================================
+
+    print(
+        "\n" + "=" * 70
+    )
+
+    print(
+        "EVALUATION COMPLETE"
+    )
+
+    print(
+        "=" * 70
+    )
+
+    print(
+        f"\nResults saved to: "
+        f"{RESULTS_PATH}"
+    )
 
 
 if __name__ == "__main__":
