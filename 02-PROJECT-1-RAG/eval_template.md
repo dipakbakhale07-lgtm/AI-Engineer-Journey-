@@ -199,3 +199,33 @@ The main improvement areas are:
 - [ ] Final faithfulness metrics
 - [ ] Final Day 7 PDF
 - [ ] GitHub update
+
+## Simple Faithfulness Check
+
+Faithfulness was checked by inspecting whether the key claims in an answer were supported by the retrieved context.
+
+### Check procedure
+
+Question
+↓
+Retrieved Context
+↓
+Generated Answer
+↓
+Compare Answer Claims with Retrieved Evidence
+↓
+Supported / Unsupported / Insufficient Evidence
+
+### Result
+
+The evaluation showed that the system generally follows the grounding rule when sufficient evidence is unavailable.
+
+Q21 provided an important example. The retriever returned information about RAG architecture, RAG pipelines, and grounded generation, but the retrieved context did not explicitly establish whether RAG guarantees that an LLM will never hallucinate.
+
+Therefore, the system correctly avoided making an unsupported claim.
+
+### Limitation
+
+This is a simple evidence-based faithfulness check, not a complete semantic or automated faithfulness metric.
+
+A future version could use claim extraction and automated evidence matching.

@@ -18,7 +18,7 @@ EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"
 OLLAMA_URL = "http://localhost:11434/api/generate"
 LLM_MODEL = "llama3:latest"
 
-TOP_K = 3
+TOP_K = 5
 
 
 # ============================================================
