@@ -4,54 +4,70 @@
 
 Make the RAG project understandable and usable by another person.
 
-## What I Learned
+## What I Completed
 
-Day 8 focused on improving the user experience of the RAG Assistant.
+- Created a basic Streamlit interface for the RAG Assistant.
+- Added a clear project title.
+- Added a short instruction for the user.
+- Added a question input box.
+- Added an Ask button.
+- Displayed the generated answer clearly.
+- Displayed the source information below the answer.
+- Added friendly handling for empty questions.
+- Added friendly handling for AI/API failures.
+- Improved response time by reducing unnecessary retrieval.
+- Tested the application with different questions.
 
-The RAG system should not only work technically; another person
-should be able to understand and use it without detailed instructions.
+## RAG User Experience
 
-## Interface
+The user flow is:
 
-Created a basic Streamlit interface for the RAG Assistant.
-
-The interface includes:
-
-- Project title
-- Short instruction for the user
-- Question input box
-- Ask button
-- Clean answer display
-- Source information below the answer
-
-## Error Handling
-
-Added friendly handling for:
-
-- Empty questions
-- Ollama/API connection failure
-- API request failure
-- Timeout
-- General processing errors
-
-The application displays a friendly message instead of exposing
-a Python traceback to the user.
-
-## RAG Flow
-
-The user experience follows this flow:
-
-```text
 User Question
-     ↓
+↓
 Question Embedding
-     ↓
+↓
 Similarity Search
-     ↓
+↓
 Relevant Chunks
-     ↓
+↓
 LLM
-     ↓
-Grounded Answer
-     ↓
+↓
+Answer
+↓
 Source
+
+## Independent User Test
+
+One family member/friend tested the RAG Assistant.
+
+The tester tried 5 questions without detailed instructions from me.
+
+### Tester Feedback
+
+- Interface was easy to understand.
+- Question box was clear.
+- Answer was easy to find.
+- Source information was visible.
+- No major confusion was reported.
+
+## Important Learning
+
+A RAG application should not only work technically.
+
+It should also be understandable and easy for another person to use.
+
+The interface should clearly communicate:
+
+- What the application does.
+- Where to enter a question.
+- Where the answer appears.
+- Where the information came from.
+- What happens when the system cannot answer.
+
+## Day 8 Deliverable
+
+Usable RAG Assistant + feedback from one tester.
+
+## Status
+
+COMPLETE
