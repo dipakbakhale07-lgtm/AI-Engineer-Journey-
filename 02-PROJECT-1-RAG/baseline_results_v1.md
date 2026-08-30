@@ -12,7 +12,9 @@ Questions: 25
 
 ## Q1
 
-**Question:** What is Artificial Intelligence?
+**Question:** Wha
+
+t is Artificial Intelligence?
 
 **Retrieved Sources:**
 

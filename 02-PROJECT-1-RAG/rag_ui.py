@@ -44,7 +44,7 @@ st.set_page_config(
 st.title("🤖 RAG Assistant")
 
 st.write(
-    "Ask a question based on the available knowledge."
+    "Ask a question based on the available knowledge documents."
 )
 
 
@@ -63,6 +63,7 @@ def load_documents():
     for file_path in sorted(
         DOCUMENTS_PATH.glob("*.md")
     ):
+
         text = file_path.read_text(
             encoding="utf-8"
         )
@@ -270,7 +271,8 @@ def generate_answer(
     retrieved_results
 ):
     """
-    Generate an answer using only retrieved context.
+    Generate a detailed grounded answer
+    using only retrieved context.
     """
 
     retrieved_text = "\n\n---\n\n".join(
@@ -279,35 +281,41 @@ def generate_answer(
     )
 
     prompt = f"""
-You are a document question-answering assistant.
+You are a helpful document-based AI assistant.
 
-Use the retrieved context to answer the question.
+Your job is to answer the user's question using ONLY the information
+provided in the retrieved context.
 
-Retrieved Context:
+IMPORTANT ANSWER RULES:
 
-{retrieved_text}
-
-Question:
-
-{question}
-
-Instructions:
-
-- If the answer is present in the retrieved context,
-  answer it clearly and in detail.
-- Use only information from the retrieved context.
-- Do not use outside knowledge.
-- Do not invent facts.
-- Do not guess.
-- If the answer is not present in the retrieved context,
-  say exactly:
+1. Give a clear, useful, and properly explained answer.
+2. Do not give only a one-line answer when the context contains enough
+   information for a fuller explanation.
+3. For explanatory questions, write approximately 2 to 5 complete
+   sentences.
+4. Include important details from the retrieved context.
+5. You may use short bullet points when they make the answer clearer.
+6. Do not add information that is not present in the retrieved context.
+7. Do not use outside knowledge.
+8. Do not invent or guess facts.
+9. If the answer cannot be found in the retrieved context, respond
+   exactly with:
 
 "{FALLBACK_MESSAGE}"
 
-Answer:
+RETRIEVED CONTEXT:
+------------------
+{retrieved_text}
+
+USER QUESTION:
+--------------
+{question}
+
+Write a clear and detailed grounded answer:
 """
 
     response = requests.post(
+
         OLLAMA_URL,
 
         json={
@@ -316,12 +324,12 @@ Answer:
             "stream": False,
 
             "options": {
-                "temperature": 0.2,
-                "num_predict": 200
+                "temperature": 0.3,
+                "num_predict": 500
             }
         },
 
-        timeout=30
+        timeout=60
     )
 
     response.raise_for_status()
