@@ -1,0 +1,147 @@
+# DAY 11 PRACTICE — Lead Agent Design
+
+## Project
+
+AI Lead Qualification Agent
+
+## Objective
+
+Design an AI-assisted workflow that can classify incoming leads consistently and provide structured information for human review.
+
+---
+
+## Dataset
+
+Created a dataset containing 20 dummy leads.
+
+Each lead contains:
+
+- Name
+- Course interest
+- Message
+- City
+- Timeline
+
+Status: PASS
+
+---
+
+## Course Categories
+
+The available categories are:
+
+- SOC
+- Desktop
+- VAPT
+- Other
+
+Category classification is based mainly on explicit course interest and keywords in the lead message.
+
+Status: PASS
+
+---
+
+## Priority Levels
+
+The available priority levels are:
+
+- Hot
+- Warm
+- Cold
+
+Priority is determined using:
+
+1. Strength of interest
+2. Enrollment intent
+3. Timeline for taking action
+
+Status: PASS
+
+---
+
+## Classification Consistency
+
+The rules define clear signals for each category and priority.
+
+Examples of strong signals include:
+
+- Ready to enroll
+- Wants to join
+- Requests registration details
+- Wants to start immediately
+
+These signals normally result in a Hot priority.
+
+Leads asking for information, fees, syllabus, duration, or batch details are generally Warm.
+
+Leads who are only exploring, have no timeline, or show weak interest are generally Cold.
+
+Status: PASS
+
+---
+
+## Structured AI Output
+
+Each AI classification should contain:
+
+- category
+- priority
+- reason
+- recommended_next_action
+- draft_reply
+
+The structured format makes the output easier for a human to review.
+
+Status: PASS
+
+---
+
+## Human Review
+
+The AI is intended to assist a workflow.
+
+A human can review:
+
+- The assigned category
+- The assigned priority
+- The reason for the decision
+- The recommended next action
+- The draft reply
+
+The final decision should remain reviewable by a human.
+
+Status: PASS
+
+---
+
+## Final Self-Check
+
+Question:
+
+Would two people reading the rules classify most leads similarly?
+
+Answer:
+
+YES
+
+Question:
+
+Are category and priority based on clearly defined rules?
+
+Answer:
+
+YES
+
+Question:
+
+Does the AI output follow a consistent structure?
+
+Answer:
+
+YES
+
+---
+
+## Result
+
+Day 11 lead agent design and classification workflow completed successfully.

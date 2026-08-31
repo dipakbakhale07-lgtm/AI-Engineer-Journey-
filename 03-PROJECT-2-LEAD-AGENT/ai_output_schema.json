@@ -1,0 +1,8 @@
+{
+  "category": "SOC | Desktop | VAPT | Other",
+  "priority": "Hot | Warm | Cold",
+  "reason": "Brief explanation for why the lead received this category and priority.",
+  "recommended_next_action": "What the business or sales team should do next.",
+  "draft_reply": "A helpful draft response that can be reviewed before sending."
+}
+
