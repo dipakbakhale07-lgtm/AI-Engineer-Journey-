@@ -1,0 +1,72 @@
+# Day 12 Practice — Lead Classification
+
+## Practice Goal
+
+Practice understanding how an AI model can classify leads using clear instructions and structured output.
+
+## Task 1 — Classification
+
+Classify the following leads manually.
+
+### Lead A
+
+Course Interest: SOC
+
+Message: I want to join the SOC course immediately.
+
+Timeline: Immediately
+
+Expected Priority: Hot
+
+---
+
+### Lead B
+
+Course Interest: VAPT
+
+Message: Can you tell me the VAPT course fees and duration?
+
+Timeline: Next month
+
+Expected Priority: Warm
+
+---
+
+### Lead C
+
+Course Interest: Desktop
+
+Message: I am just checking what courses are available.
+
+Timeline: Not decided
+
+Expected Priority: Cold
+
+---
+
+## Task 2 — Important Prompt Rule
+
+The AI should classify leads using only the provided information.
+
+It should not invent missing information such as:
+
+- Phone number
+- Budget
+- Salary
+- Financial status
+- Enrollment status
+
+---
+
+## Task 3 — Output Structure
+
+Example structured output:
+
+```json
+{
+  "category": "SOC",
+  "priority": "Hot",
+  "reason": "The lead wants to join immediately.",
+  "recommended_next_action": "Share admission details and follow up quickly.",
+  "draft_reply": "Thank you for your interest in the SOC course. We can share the admission details and next steps."
+}
