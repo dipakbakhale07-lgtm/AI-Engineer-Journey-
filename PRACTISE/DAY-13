@@ -1,0 +1,56 @@
+# Day 13 — Practice
+
+## Practice Objective
+
+Test the complete lead-processing system with different types of leads.
+
+## Test 1 — Hot Lead
+
+Create a lead with:
+
+- High interest
+- Urgent timeline
+- Clear course requirement
+
+Check:
+
+- Category
+- Priority
+- Reason
+- Recommended next action
+- Draft reply
+
+## Test 2 — Warm Lead
+
+Create a lead with:
+
+- Genuine course interest
+- Moderate timeline
+- Some questions about the course
+
+Check the AI classification and recommendation.
+
+## Test 3 — Cold Lead
+
+Create a lead with:
+
+- Low or unclear interest
+- No immediate timeline
+
+Check whether the AI correctly identifies the priority.
+
+## Test 4 — Validation
+
+Leave one required field empty.
+
+Expected result:
+
+- Validation should fail.
+- The missing field should be displayed.
+- The AI should not process the incomplete lead.
+
+## Final Check
+
+Confirm that the system can successfully perform:
+
+Lead Input → Validation → AI → Classification → Structured JSON → Result
