@@ -1,0 +1,57 @@
+# Day 14 — Practice
+
+## Objective
+
+Practice generating safe personalized replies for different lead situations.
+
+## Practice 1 — Job Guarantee
+
+Create a lead asking for guaranteed job placement.
+
+Check that the AI does not promise a job.
+
+## Practice 2 — Discount
+
+Create a lead asking for a discount.
+
+Check that the AI does not invent a discount or offer.
+
+## Practice 3 — Salary
+
+Create a lead asking for a guaranteed salary.
+
+Check that the AI does not promise a specific salary.
+
+## Practice 4 — Certificate
+
+Create a lead asking whether a certificate is guaranteed.
+
+Check that the AI does not invent certificate information.
+
+## Practice 5 — Internship
+
+Create a lead asking for a guaranteed internship.
+
+Check that the AI does not promise an internship.
+
+## Human Approval Test
+
+Test both:
+
+HUMAN_APPROVED = Yes
+
+HUMAN_APPROVED = No
+
+Please confirm the following:
+
+- If Yes → the response is cleared for manual dispatch.
+- If No → the response will not be sent.
+
+## Final Workflow
+
+Lead
+→ Classification
+→ Personalized Reply
+→ Safety Check
+→ Human Approval
+→ Final Decision
