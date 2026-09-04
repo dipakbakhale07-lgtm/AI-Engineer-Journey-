@@ -200,3 +200,30 @@
 
 ---
 
+## Expected vs AI Classification
+
+| Lead | Expected Priority | AI Priority | Result |
+|------|-------------------|-------------|--------|
+| Lead 1 | Hot | Hot | Match |
+| Lead 2 | Warm | Warm | Match |
+| Lead 3 | Warm | Warm | Match |
+| Lead 4 | Cold | Cold | Match |
+| Lead 5 | Warm | Warm | Match |
+| Lead 6 | Cold | Cold | Match |
+| Lead 7 | Warm | Warm | Match |
+| Lead 8 | Hot | Hot | Match |
+| Lead 9 | Cold | Warm | Different |
+| Lead 10 | Warm | Warm | Match |
+
+## Evaluation Summary
+
+9 out of 10 classifications were reasonable.
+
+Lead 9 was classified differently from the expected result. The lead was comparing courses and had no decided timeline, so Cold was the expected classification.
+
+The output format remained consistent across the test results.
+
+## Day 12 Status
+
+COMPLETE
+
