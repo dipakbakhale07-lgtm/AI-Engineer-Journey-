@@ -54,10 +54,9 @@ def load_prompt():
 def generate_reply(lead, classification, prompt):
 
     category = str(
-        classification.get("category", "warm")
+        classification.get("priority", "warm")
     ).lower()
 
-    # Select template based on category
     template = REPLY_TEMPLATES.get(
         category,
         REPLY_TEMPLATES["warm"]
@@ -83,14 +82,16 @@ IMPORTANT SAFETY AND ACCURACY RULES:
 3. Do NOT promise job placement.
 4. Do NOT promise a salary.
 5. Do NOT promise discounts.
-6. Do NOT provide guarantees.
-7. Do NOT invent fees, policies, course duration, certificates,
+6. Do NOT promise certificates.
+7. Do NOT promise internships.
+8. Do NOT provide guarantees.
+9. Do NOT invent fees, policies, course duration, certificates,
    placement statistics, discounts, schedules, or other business facts.
-8. If information is not provided, tell the lead that the relevant
-   information can be shared after confirmation.
-9. The reply is ONLY a draft.
-10. Do NOT send the message automatically.
-11. Keep the reply professional, friendly, and concise.
+10. If information is not provided, clearly say that the relevant
+    information needs to be confirmed.
+11. The reply is ONLY a draft.
+12. Do NOT send the message automatically.
+13. Keep the reply professional, friendly, and concise.
 """
 
     full_prompt = f"""
@@ -187,7 +188,6 @@ def process_lead(lead, classification, prompt):
 
     print("\nSafety Check:", safety_check)
 
-    # Never allow sending if safety check fails
     if safety_check != "PASS":
 
         print("\n❌ Safety check failed.")
@@ -219,10 +219,33 @@ def process_lead(lead, classification, prompt):
 
 
 # ============================================================
+# GET NEXT TEST NUMBER
+# ============================================================
+
+def get_next_test_number():
+
+    if not RESULTS_FILE.exists():
+        return 1
+
+    content = RESULTS_FILE.read_text(
+        encoding="utf-8"
+    )
+
+    test_count = content.count("## Test ")
+
+    return test_count + 1
+
+
+# ============================================================
 # SAVE TEST RESULT
 # ============================================================
 
-def save_result(test_number, lead, classification, reply_result):
+def save_result(
+    test_number,
+    lead,
+    classification,
+    reply_result
+):
 
     with open(
         RESULTS_FILE,
@@ -257,6 +280,11 @@ def save_result(test_number, lead, classification, reply_result):
         file.write(
             f"- **Reason:** "
             f"{classification.get('reason', '')}\n"
+        )
+
+        file.write(
+            f"- **Recommended Next Action:** "
+            f"{classification.get('recommended_next_action', '')}\n"
         )
 
         file.write("\n### Draft Reply\n\n")
@@ -312,6 +340,48 @@ def get_new_lead():
 
 
 # ============================================================
+# CLASSIFY LEAD
+# ============================================================
+
+def classify_lead(lead, prompt):
+
+    classification_prompt = f"""
+{prompt}
+
+Classify the following lead:
+
+Name: {lead['name']}
+Course Interest: {lead['course_interest']}
+Lead Message: {lead['lead_message']}
+City: {lead['city']}
+Timeline: {lead['timeline']}
+
+Return JSON with:
+
+category
+priority
+reason
+recommended_next_action
+draft_reply
+"""
+
+    response = ollama.chat(
+        model="llama3:latest",
+        messages=[
+            {
+                "role": "user",
+                "content": classification_prompt
+            }
+        ],
+        format="json"
+    )
+
+    return json.loads(
+        response["message"]["content"]
+    )
+
+
+# ============================================================
 # MAIN
 # ============================================================
 
@@ -324,8 +394,8 @@ def main():
 
     lead = get_new_lead()
 
-    # --------------------------------s------------------------
-    # Basic validation
+    # --------------------------------------------------------
+    # VALIDATION
     # --------------------------------------------------------
 
     required_fields = [
@@ -354,45 +424,16 @@ def main():
     print("\n✅ Lead information validated.")
 
     # --------------------------------------------------------
-    # Classify lead
+    # CLASSIFICATION
     # --------------------------------------------------------
 
     print("\n🤖 Classifying lead...")
 
-    classification_prompt = f"""
-{prompt}
-
-Classify the following lead:
-
-Name: {lead['name']}
-Course Interest: {lead['course_interest']}
-Lead Message: {lead['lead_message']}
-City: {lead['city']}
-Timeline: {lead['timeline']}
-
-Return JSON with:
-category
-priority
-reason
-recommended_next_action
-draft_reply
-"""
-
     try:
 
-        response = ollama.chat(
-            model="llama3:latest",
-            messages=[
-                {
-                    "role": "user",
-                    "content": classification_prompt
-                }
-            ],
-            format="json"
-        )
-
-        classification = json.loads(
-            response["message"]["content"]
+        classification = classify_lead(
+            lead,
+            prompt
         )
 
     except Exception as error:
@@ -423,7 +464,7 @@ draft_reply
     )
 
     # --------------------------------------------------------
-    # Generate reply + approval
+    # REPLY + HUMAN APPROVAL
     # --------------------------------------------------------
 
     reply_result = process_lead(
@@ -433,21 +474,20 @@ draft_reply
     )
 
     # --------------------------------------------------------
-    # Save result
+    # SAVE RESULT WITHOUT OVERWRITING
     # --------------------------------------------------------
 
-    with open(
-        RESULTS_FILE,
-        "w",
-        encoding="utf-8"
-    ) as file:
+    test_number = get_next_test_number()
 
-        file.write(
-            "# Day 14 — Reply Agent Test Results\n\n"
+    if not RESULTS_FILE.exists():
+
+        RESULTS_FILE.write_text(
+            "# Day 14 — Reply Agent Test Results\n\n",
+            encoding="utf-8"
         )
 
     save_result(
-        1,
+        test_number,
         lead,
         classification,
         reply_result
@@ -458,7 +498,7 @@ draft_reply
     print("=" * 55)
 
     print(
-        f"\n📄 Results saved to: "
+        f"\n📄 Test {test_number} saved to: "
         f"{RESULTS_FILE.name}"
     )
 
