@@ -1,0 +1,92 @@
+[
+    {
+        "id": "L001",
+        "name": "Rahul",
+        "course_interest": "Python AI Course",
+        "category": "Python AI Course",
+        "priority": "Hot",
+        "status": "NEW",
+        "last_contact_date": "2026-09-04",
+        "next_followup_date": "2026-09-05",
+        "city": "",
+        "timeline": "",
+        "lead_message": ""
+    },
+    {
+        "id": "L002",
+        "name": "Amit",
+        "course_interest": "AI Engineering",
+        "category": "AI Engineering",
+        "priority": "Hot",
+        "status": "REVIEWED",
+        "last_contact_date": "2026-09-03",
+        "next_followup_date": "2026-09-06",
+        "city": "",
+        "timeline": "",
+        "lead_message": ""
+    },
+    {
+        "id": "L003",
+        "name": "Sneha",
+        "course_interest": "Data Science",
+        "category": "Data Science",
+        "priority": "Hot",
+        "status": "CONTACTED",
+        "last_contact_date": "2026-09-04",
+        "next_followup_date": "2026-09-07",
+        "city": "",
+        "timeline": "",
+        "lead_message": ""
+    },
+    {
+        "id": "L004",
+        "name": "Rohit",
+        "course_interest": "Machine Learning",
+        "category": "Machine Learning",
+        "priority": "Cold",
+        "status": "NEW",
+        "last_contact_date": "2026-09-02",
+        "next_followup_date": "2026-09-05",
+        "city": "",
+        "timeline": "",
+        "lead_message": ""
+    },
+    {
+        "id": "L005",
+        "name": "Priya",
+        "course_interest": "Generative AI",
+        "category": "Generative AI",
+        "priority": "Warm",
+        "status": "REVIEWED",
+        "last_contact_date": "2026-09-01",
+        "next_followup_date": "2026-09-04",
+        "city": "",
+        "timeline": "",
+        "lead_message": ""
+    },
+    {
+        "id": "L006",
+        "name": "ganesh",
+        "course_interest": "AI Engineering",
+        "lead_message": "i bwant to lear ai engineering in deep",
+        "city": "mumbai",
+        "timeline": "2 months",
+        "category": "ai engineering",
+        "priority": "Warm",
+        "status": "NEW",
+        "last_contact_date": "2026-09-05",
+        "next_followup_date": "2026-09-06"
+    },
+    {
+        "id": "L007",
+        "name": "adwait",
+        "course_interest": "Machine Learning",
+        "lead_message": "i have strong intrest in data science",
+        "city": "sillod",
+        "timeline": "2 days",
+        "priority": "Cold",
+        "status": "NEW",
+        "last_contact_date": "2026-09-05",
+        "next_followup_date": "2026-09-06"
+    }
+]
