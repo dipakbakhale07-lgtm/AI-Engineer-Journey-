@@ -1,0 +1,143 @@
+# Day 16 — Practice
+
+## Practice 1 — Explain the Problem
+
+Explain in your own words:
+
+What problem does the AI Lead Qualification Agent demonstrate a solution for?
+
+Expected understanding:
+
+The system demonstrates how AI and Python can help organize enquiries, classify leads, prepare reply drafts, and track follow-ups.
+
+## Practice 2 — Explain the Benefit
+
+Explain:
+
+What potential benefit does this system provide?
+
+Expected understanding:
+
+It can reduce repetitive lead-management work, organize information, help prioritize enquiries, and make follow-up tracking easier.
+
+## Practice 3 — Manual Work
+
+Identify the manual tasks that the project can assist with:
+
+- Lead classification
+- Priority identification
+- Reply drafting
+- Follow-up calculation
+- Checking leads that need attention
+- Organizing lead information
+
+## Practice 4 — Human Approval
+
+Explain why human approval is included.
+
+Expected understanding:
+
+AI-generated responses are drafts and should be reviewed by a person before being used.
+
+## Practice 5 — Stored Data
+
+List five examples of information that can be stored for a lead.
+
+Example:
+
+- Name
+- Course
+- City
+- Priority
+- Next follow-up date
+
+## Practice 6 — Limitations
+
+Write three limitations of the project.
+
+Example:
+
+1. AI can classify a lead incorrectly.
+2. Unclear input can produce weaker results.
+3. The project is an educational implementation, not a production system.
+
+## Practice 7 — Risks
+
+Name the three main risks discussed in Day 16:
+
+1. Wrong classification
+2. Privacy
+3. Over-automation
+
+## Practice 8 — Workflow
+
+Complete the workflow:
+
+Lead Input
+→ __________
+→ AI Classification
+→ __________
+→ Reply Draft
+→ Human Review
+→ __________
+→ Dashboard
+
+Expected answers:
+
+Validation
+Recommended Next Action
+Follow-Up Tracking / Data Storage
+
+## Practice 9 — Business Explanation
+
+Explain the project to a non-technical person in 3–5 sentences.
+
+Example:
+
+This project demonstrates an AI system that helps organize customer enquiries. It can classify leads, identify priority, prepare response drafts, and track follow-ups. The dashboard helps show which leads need attention. A human reviews AI-generated responses before they are used.
+
+## Practice 10 — Week 2 Reflection
+
+Answer:
+
+### What did I build?
+
+An AI Lead Qualification Agent using Python.
+
+### What did I learn?
+
+How AI classification, structured output, reply drafting, follow-up tracking, storage, and a dashboard can work together.
+
+### What was the biggest lesson?
+
+A useful AI application requires more than an AI model. It also needs application logic, data handling, testing, and human oversight.
+
+## Self-Check
+
+I can explain:
+
+1. What problem the project addresses.
+2. What the system does.
+3. What the potential business benefit is.
+4. What manual work is reduced.
+5. Why human approval is needed.
+6. What data is stored.
+7. What the limitations are.
+8. What the three major risks are.
+9. How the complete workflow works.
+10. What I learned during Week 2.
+
+## Day 16 Status
+
+Business Thinking ✅
+Business Benefit ✅
+Manual Work Reduced ✅
+Human Approval ✅
+Data Stored ✅
+Limitations ✅
+Risks ✅
+Workflow Explanation ✅
+Week 2 Review ✅
+
+Demo/Recording: Removed
+Purpose: Educational

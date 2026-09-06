@@ -1,0 +1,47 @@
+# Day 15 — Practice
+
+## Practice 1 — Follow-Up Dates
+
+Test a lead with a known last contact date.
+
+Calculate:
+
+- Day 1 follow-up
+- Day 3 follow-up
+
+## Practice 2 — Follow-Up Status
+
+Test leads with:
+
+- Follow-up due today
+- Overdue follow-up
+- Upcoming follow-up
+
+Check whether the dashboard identifies them correctly.
+
+## Practice 3 — Duplicate Lead
+
+Try adding the same lead ID twice.
+
+Expected result:
+
+The second lead should not be added.
+
+## Practice 4 — Dashboard Metrics
+
+Check:
+
+- Total leads
+- Hot leads
+- Leads by category
+- Awaiting follow-up
+
+## Self-Check
+
+I can identify:
+
+1. Which lead needs attention.
+2. When the follow-up is due.
+3. Why the lead needs attention.
+4. Which leads are hot.
+5. Whether a lead is a duplicate.
