@@ -16,18 +16,18 @@ DATA_FILE = "lead_data.json"
 # COLORS
 # ============================================================
 
-BG = "#F4F7FB"
-CARD = "#FFFFFF"
+BG = "#BCD9FF"
+CARD = "#635959"
 TEXT = "#172033"
-MUTED = "#6B7280"
-BORDER = "#DDE3EC"
+MUTED = "#D1E1FF"
+BORDER = "#0F6CF8"
 
 PRIMARY = "#2563EB"
 PRIMARY_DARK = "#1D4ED8"
 
 HOT = "#DC2626"
 WARM = "#D97706"
-COLD = "#64748B"
+COLD = "#1E64C6"
 
 SUCCESS = "#16A34A"
 WARNING = "#D97706"
