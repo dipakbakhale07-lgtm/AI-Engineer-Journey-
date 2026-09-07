@@ -1,0 +1,144 @@
+# Day 17 — Practice
+
+## Practice 1 — Target Audience
+
+Who is the target audience for the Social Media Assistant?
+
+Answer:
+
+Builders and clients interested in AI, freelancing, and Python projects.
+
+---
+
+## Practice 2 — Four Post Types
+
+Name the four required post types.
+
+Answer:
+
+1. What I learned
+2. What I built
+3. What failed
+4. Simple explainer
+
+---
+
+## Practice 3 — Content Purpose
+
+Why should every post have a useful reason to exist?
+
+Answer:
+
+Because the goal is to create useful content, not spam or generic motivational posts.
+
+---
+
+## Practice 4 — Human Approval
+
+What happens before a post is published?
+
+Answer:
+
+AI prepares the draft → Human reviews → Human edits if necessary → Human approves → Manual publishing.
+
+---
+
+## Practice 5 — Automatic Publishing
+
+Should the AI automatically publish posts?
+
+Answer:
+
+No.
+
+There is no automatic publishing.
+
+---
+
+## Practice 6 — Source Checking
+
+What should be checked before publishing?
+
+Answer:
+
+The content should be based on actual learning, actual projects, actual experiences, or accurate technical information.
+
+---
+
+## Practice 7 — Useful Post
+
+Which is more useful?
+
+A. "Keep learning and never give up."
+
+B. "I built a lead qualification dashboard and learned how follow-up dates can be used to identify leads that need attention."
+
+Answer:
+
+B, because it provides a real project insight and learning value.
+
+---
+
+## Practice 8 — Content Tracker
+
+Name five fields in the content tracker.
+
+Answer:
+
+- Post ID
+- Post Type
+- Topic
+- Purpose
+- Draft Status
+
+Other fields include:
+
+- Source/Experience
+- Human Approved
+- Published
+
+---
+
+## Practice 9 — Workflow
+
+Complete the workflow:
+
+Content Idea
+↓
+AI prepares ______
+↓
+Human ______
+↓
+Human ______
+↓
+Manual publishing
+
+Answer:
+
+Draft
+Reviews
+Approves
+
+---
+
+## Practice 10 — Self-Check
+
+Before creating a post, ask:
+
+"Does this post have a useful reason to exist?"
+
+If the answer is no:
+
+Do not create or publish the post.
+
+---
+
+## Day 17 Learning
+
+I learned that a Social Media Assistant should not simply generate large amounts of content.
+
+It should help create useful, relevant, genuine content for a specific audience while keeping human approval before publishing.
+
+## Day 17 Status
+
+Practice completed: ⬜

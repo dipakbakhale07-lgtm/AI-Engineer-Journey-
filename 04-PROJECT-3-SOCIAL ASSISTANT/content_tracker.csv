@@ -1,0 +1,5 @@
+Post ID,Post Type,Topic,Purpose,Source/Experience,Draft Status,Human Approved,Published
+P001,🧠 What I learned,RAG,💡 Share a useful AI concept,I learned RAG while building Project 1,🟡 DRAFT,❌ No,❌ No
+P002,🛠️ What I built,AI Lead Qualification Agent,🚀 Show a real project and what I learned,Built during Project 2,🟡 DRAFT,❌ No,❌ No
+P003,⚠️ What failed,Python debugging,📚 Share a real problem and the lesson learned,Problem encountered during project development,🟡 DRAFT,❌ No,❌ No
+P004,💡 Simple explainer,What is an AI Agent?,🎓 Explain an AI concept simply,AI Engineering learning,🟡 DRAFT,❌ No,❌ No
