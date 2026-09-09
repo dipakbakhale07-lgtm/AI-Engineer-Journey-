@@ -1,0 +1,37 @@
+[
+  {
+    "topic": "RAG Knowledge Assistant",
+    "source_notes": "Project 1 of the AI Builder Journey focused on building a RAG Knowledge Assistant for answering questions using approved documents. I worked with the RAG flow of documents, chunks, embeddings, vector store, retrieval, LLM, and answer generation.",
+    "audience": "Builders and clients interested in AI and Python projects",
+    "key_lesson": "RAG connects retrieval with generation so an AI application can use relevant information from provided documents when answering questions.",
+    "call_to_action": "Learn the basic RAG workflow and understand how retrieval supports an AI answer."
+  },
+  {
+    "topic": "RAG Grounding and Source Checking",
+    "source_notes": "While working on Project 1, I focused on making answers more trustworthy by using retrieved context and checking whether the answer was supported by the provided documents.",
+    "audience": "AI builders learning RAG and practical AI applications",
+    "key_lesson": "A RAG system should use retrieved information as context and should avoid presenting unsupported information as if it came from the supplied documents.",
+    "call_to_action": "Try a small RAG project and test both answerable and unanswerable questions."
+  },
+  {
+    "topic": "AI Lead Qualification Agent",
+    "source_notes": "Project 2 focused on designing an AI-assisted lead qualification system in Python. I worked with lead input, classification, structured output, recommended next actions, and reply drafting.",
+    "audience": "Builders and clients interested in AI, freelancing, and Python projects",
+    "key_lesson": "An AI application becomes more useful when model output is connected to structured data and clear application logic.",
+    "call_to_action": "Explore how structured AI output can be used inside a Python application."
+  },
+  {
+    "topic": "Safe AI Reply Drafting",
+    "source_notes": "During Project 2, I worked on generating personalized reply drafts and added rules to avoid unsupported promises or invented information. Human approval remained part of the process.",
+    "audience": "AI builders interested in responsible AI applications",
+    "key_lesson": "AI-generated communication should be treated as a draft that can be reviewed rather than blindly accepted.",
+    "call_to_action": "Think about where human review should remain in an AI workflow."
+  },
+  {
+    "topic": "Lead Follow-Up Dashboard",
+    "source_notes": "In Project 2, I added follow-up tracking and a dashboard to organize lead information, follow-up dates, priorities, categories, and leads requiring attention.",
+    "audience": "Builders interested in practical Python and AI systems",
+    "key_lesson": "Combining AI results with Python logic, stored data, and a dashboard can turn separate AI features into a more organized application workflow.",
+    "call_to_action": "Identify one repetitive workflow that could be improved by combining AI with Python logic."
+  }
+]
