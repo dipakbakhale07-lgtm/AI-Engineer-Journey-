@@ -1,0 +1,45 @@
+DAY 19 PRACTICE
+
+Task:
+Build a Python drafting pipeline for the Social Media Assistant.
+
+Goal:
+Generate different post styles from the same real facts.
+
+Required post structure:
+- Hook
+- 5–8 line body
+- Lesson
+- Optional CTA
+- Hashtags
+
+Required versions:
+1. Technical
+2. Beginner-friendly
+3. Short
+
+Practice workflow:
+
+Structured Content Input
+↓
+Prompt Template
+↓
+Generated Draft
+↓
+3 Versions
+↓
+Check Facts
+↓
+Human Review
+
+Important Rules:
+
+1. Use simple English.
+2. Keep the same real facts in all versions.
+3. Check every factual claim against the notes.
+4. Do not invent personal experiences.
+5. Do not exaggerate achievements.
+6. Do not automatically publish.
+
+Expected result:
+A working Python draft generator and three versions of one real project topic.
