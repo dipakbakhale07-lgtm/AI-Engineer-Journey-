@@ -1,0 +1,66 @@
+DAY 20 PRACTICE
+
+Task:
+Test the Human Review and Quality Check system.
+
+Goal:
+Make sure AI-generated content cannot be approved without human review.
+
+Practice workflow:
+
+Generated Post
+↓
+DRAFT
+↓
+Human Review
+↓
+Quality Checklist
+↓
+REVIEW
+↓
+Human Approval
+↓
+APPROVED
+
+Quality Checklist:
+
+[ ] Is it true?
+[ ] Is it useful?
+[ ] Any private data?
+[ ] Any secret/API key?
+[ ] Any exaggerated claim?
+
+Practice Test 1:
+
+1. Generate 3 posts.
+2. Confirm all 3 posts are saved.
+3. Open the Review page.
+4. Select one post.
+5. Move it from DRAFT to REVIEW.
+6. Check all five quality checks.
+7. Click Approve.
+8. Confirm the status becomes APPROVED.
+9. Confirm review information is saved.
+
+Practice Test 2:
+
+1. Select another post.
+2. Move it to REVIEW.
+3. Leave at least one quality check unchecked.
+4. Confirm that approval is blocked.
+
+Important Rules:
+
+1. AI must not automatically publish.
+2. Human approval is required.
+3. Private information must not be published.
+4. Secrets and API keys must not be published.
+5. Unsupported or exaggerated claims must be rejected.
+
+Expected Result:
+
+The Human Review system correctly controls the transition:
+
+DRAFT → REVIEW → APPROVED
+
+and prevents approval when the required checks are incomplete.

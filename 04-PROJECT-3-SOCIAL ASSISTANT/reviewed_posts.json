@@ -1,0 +1,17 @@
+[
+    {
+        "topic": "RAG Grounding and Source Checking",
+        "style": "Beginner-friendly",
+        "content": "Here is the LinkedIn post:\n\nHook:\nWhen working on Project 1, I focused on making answers more trustworthy by using retrieved context and checking whether the answer was supported by the provided documents.\n\nBody:\nA RAG system should use retrieved information as context and should avoid presenting unsupported information as if it came from the supplied documents. This ensures that the answers provided are trustworthy and accurate. Retrieved context helps to provide a better understanding of the answer. It's essential to check if the answer is supported by the provided documents to avoid presenting misinformation.\n\nLesson:\nA key lesson learned is that a RAG system should use retrieved information as context and should avoid presenting unsupported information as if it came from the supplied documents.\n\nCTA:\nTry a small RAG project and test both answerable and unanswerable questions.\n\nHashtags:\n#RAG #SourceChecking #AIApplications #BeginnerFriendly",
+        "status": "APPROVED",
+        "human_approved": true,
+        "reviewed_at": "2026-09-11T18:37:17.564515",
+        "checks": {
+            "is_true": true,
+            "is_useful": true,
+            "no_private_data": true,
+            "no_secret_api_key": true,
+            "no_exaggerated_claim": true
+        }
+    }
+]
