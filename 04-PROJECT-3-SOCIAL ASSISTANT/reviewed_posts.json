@@ -13,5 +13,35 @@
             "no_secret_api_key": true,
             "no_exaggerated_claim": true
         }
+    },
+    {
+        "topic": "RAG Knowledge Assistant",
+        "style": "Technical",
+        "content": "Here is the LinkedIn post:\n\nHook:\nProject 1 of the AI Builder Journey focused on building a RAG Knowledge Assistant for answering questions using approved documents.\n\nBody:\nI worked with the RAG flow of documents, chunks, embeddings, vector store, retrieval, LLM, and answer generation. This project connected retrieval with generation, enabling an AI application to use relevant information from provided documents when answering questions.\n\nLesson:\nRAG connects retrieval with generation, allowing an AI application to use relevant information from provided documents when answering questions.\n\nCTA:\nLearn the basic RAG workflow and understand how retrieval supports an AI answer.\n\nHashtags:\n#AI #Python #RAG #KnowledgeAssistant #AIBuilderJourney",
+        "status": "APPROVED",
+        "human_approved": true,
+        "reviewed_at": "2026-09-12T10:41:43.039042",
+        "checks": {
+            "is_true": true,
+            "is_useful": true,
+            "no_private_data": true,
+            "no_secret_api_key": true,
+            "no_exaggerated_claim": true
+        }
+    },
+    {
+        "topic": "RAG Knowledge Assistant",
+        "style": "Technical",
+        "content": "Here is the LinkedIn post:\n\nHook:\nProject 1 of the AI Builder Journey focused on building a RAG Knowledge Assistant for answering questions using approved documents.\n\nBody:\nI worked with the RAG flow of documents, chunks, embeddings, vector store, retrieval, LLM, and answer generation. This project connected retrieval with generation, enabling an AI application to use relevant information from provided documents when answering questions.\n\nLesson:\nRAG connects retrieval with generation, allowing an AI application to use relevant information from provided documents when answering questions.\n\nCTA:\nLearn the basic RAG workflow and understand how retrieval supports an AI answer.\n\nHashtags:\n#AI #Python #RAG #KnowledgeAssistant #AIBuilderJourney",
+        "status": "APPROVED",
+        "human_approved": true,
+        "reviewed_at": "2026-09-12T10:42:59.542223",
+        "checks": {
+            "is_true": true,
+            "is_useful": true,
+            "no_private_data": true,
+            "no_secret_api_key": true,
+            "no_exaggerated_claim": true
+        }
     }
 ]

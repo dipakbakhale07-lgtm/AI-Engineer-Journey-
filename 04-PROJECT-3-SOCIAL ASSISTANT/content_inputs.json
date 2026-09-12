@@ -68,5 +68,19 @@
         "audience": "AI builders, Python learners and potential clients",
         "key_lesson": "\"RAG connects retrieval with generation so an AI application can use relevant information from provided documents when answering questions.\",",
         "call_to_action": ""
+    },
+    {
+        "topic": "rag",
+        "source_notes": "\"While working on Project 1, I focused on making answers more trustworthy by using retrieved context and checking whether the answer was supported by the provided documents.\",\n",
+        "audience": "AI builders, Python learners and potential clients",
+        "key_lesson": " \"A RAG system should use retrieved information as context and should avoid presenting unsupported information as if it came from the supplied documents.\",",
+        "call_to_action": ""
+    },
+    {
+        "topic": " \"AI Lead Qualification Agent\",",
+        "source_notes": "\"Project 2 focused on designing an AI-assisted lead qualification system in Python. I worked with lead input, classification, structured output, recommended next actions, and reply drafting.\",",
+        "audience": "\"Builders and clients interested in AI, freelancing, and Python projects\",",
+        "key_lesson": "\"An AI application becomes more useful when model output is connected to structured data and clear application logic.\",",
+        "call_to_action": ""
     }
 ]

@@ -1,4 +1,4 @@
-DAY 20 PRACTICE
+## DAY 20 PRACTICE
 
 Task:
 Test the Human Review and Quality Check system.
@@ -22,7 +22,7 @@ Human Approval
 ↓
 APPROVED
 
-Quality Checklist:
+## Quality Checklist:
 
 [ ] Is it true?
 [ ] Is it useful?
@@ -30,7 +30,7 @@ Quality Checklist:
 [ ] Any secret/API key?
 [ ] Any exaggerated claim?
 
-Practice Test 1:
+## Practice Test 1:
 
 1. Generate 3 posts.
 2. Confirm all 3 posts are saved.
@@ -42,14 +42,14 @@ Practice Test 1:
 8. Confirm the status becomes APPROVED.
 9. Confirm review information is saved.
 
-Practice Test 2:
+## Practice Test 2:
 
 1. Select another post.
 2. Move it to REVIEW.
 3. Leave at least one quality check unchecked.
 4. Confirm that approval is blocked.
 
-Important Rules:
+## Important Rules:
 
 1. AI must not automatically publish.
 2. Human approval is required.
@@ -57,7 +57,7 @@ Important Rules:
 4. Secrets and API keys must not be published.
 5. Unsupported or exaggerated claims must be rejected.
 
-Expected Result:
+## Expected Result:
 
 The Human Review system correctly controls the transition:
 
