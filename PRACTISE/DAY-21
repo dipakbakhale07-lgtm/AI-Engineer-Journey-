@@ -1,0 +1,50 @@
+DAY 21 PRACTICE
+
+Task:
+Publish one genuine build post from Project 1.
+
+Project:
+RAG Knowledge Assistant
+
+What I Built:
+A RAG-based application that answers questions using information from provided documents.
+
+Core Workflow:
+Documents
+↓
+Chunking
+↓
+Embeddings
+↓
+Vector Store
+↓
+Retrieval
+↓
+Context
+↓
+LLM
+↓
+Grounded Answer
+
+Problem:
+An AI application may need to answer questions using specific provided documents instead of relying only on general LLM knowledge.
+
+Challenge:
+RAG quality depends on source documents, chunking, retrieval, and grounding.
+
+Lesson:
+A RAG system should use retrieved evidence when available and should not present unsupported information as a document-grounded answer.
+
+Publishing Checklist:
+
+[ ] What I built is genuine
+[ ] Problem is clearly explained
+[ ] Challenge is genuine
+[ ] Lesson is based on Project 1
+[ ] No invented results
+[ ] No exaggerated claims
+[ ] Screenshot added
+[ ] GitHub link added
+[ ] Human review completed
+[ ] Post published
+[ ] LinkedIn URL recorded
