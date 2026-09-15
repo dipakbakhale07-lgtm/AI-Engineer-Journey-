@@ -1,0 +1,28 @@
+# DAY 23 — Agent Routing Examples
+
+| # | User Request | Tool Selected | Reason |
+|---|---|---|---|
+| 1 | What are your business hours? | search_faq() | User is asking a common FAQ |
+| 2 | Do you provide home delivery? | search_faq() | User is asking about a business service |
+| 3 | Show me all interested leads | get_leads_by_status() | User wants leads with a specific status |
+| 4 | Find my new leads | get_leads_by_status() | User wants leads filtered by status |
+| 5 | Give me all contacted leads | get_leads_by_status() | User wants leads with a specific status |
+| 6 | Write a follow-up for Rahul | draft_followup() | User wants a follow-up message |
+| 7 | Create a message for Priya who is interested in AI automation | draft_followup() | User wants a personalized follow-up |
+| 8 | Draft a follow-up for Amit, whose status is interested | draft_followup() | User wants a follow-up based on lead information |
+| 9 | What payment methods do you accept? | search_faq() | User is asking a common business question |
+| 10 | Show me leads that are qualified | get_leads_by_status() | User wants leads filtered by status |
+
+## Routing Rule
+
+The agent should identify the user's goal first.
+
+- General business question → search_faq()
+- Request for leads by status → get_leads_by_status()
+- Request to create a follow-up → draft_followup()
+
+## Important
+
+The agent should not randomly select a tool.
+
+It should choose a tool based on the user's request and the tool's defined purpose.
