@@ -1,0 +1,66 @@
+DAY 24 — TOOL TESTING PRACTICE
+
+PROJECT 4 — MULTI-TOOL BUSINESS AGENT
+
+TOOL 1: search_faq()
+File: tool_faq.py
+
+Purpose:
+Search sample FAQ knowledge.
+
+Test 1:
+Input: What are your business hours?
+Result: Success — correct business hours returned.
+
+Test 2:
+Input: Do you provide home delivery?
+Result: Success — correct delivery information returned.
+
+Test 3:
+Input: What payment methods do you accept?
+Result: Success — cash, UPI and card information returned.
+
+Test 4:
+Input: What is your return policy?
+Result: Success — return policy information returned.
+
+Test 5:
+Input: Empty question
+Result: Error handled correctly — "Question is required."
+
+
+TOOL 2: get_leads_by_status()
+File: tool_leads.py
+
+Purpose:
+Find dummy leads by status.
+
+Test 1:
+Input: interested
+Result: 2 matching leads returned.
+
+Test 2:
+Input: new
+Result: 1 matching lead returned.
+
+Test 3:
+Input: qualified
+Result: 1 matching lead returned.
+
+Test 4:
+Input: contacted
+Result: 1 matching lead returned.
+
+Test 5:
+Input: Empty status
+Result: Error handled correctly — "Lead status is required."
+
+
+KEY PRACTICE
+
+Both tools were tested independently without AI.
+
+This confirmed that the tools work correctly before they are connected to an agent.
+
+DAY 24 STATUS:
+COMPLETE
