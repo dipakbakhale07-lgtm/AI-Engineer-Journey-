@@ -1,94 +1,78 @@
-# DAY 23 — Understand Tool-Using Agents
+# DAY 23 — Project 4: Understand Tool-Using Agents
 
 ## Goal
 
-Understand how an AI agent can choose and use different tools based on the user's request.
+Understand how an AI agent can move beyond a fixed script and make controlled decisions about which tool to use.
 
 ## Agent Loop
 
-User Goal
-↓
-Understand Request
-↓
-Choose Tool
-↓
-Execute Tool
-↓
-Observe Result
-↓
-Final Answer
+Goal
+→ Choose Tool
+→ Execute
+→ Observe
+→ Answer
 
-## Tool 1 — search_faq()
+## Tools
 
-### Purpose
+### 1. search_faq(question)
+
+Purpose:
 Search frequently asked questions and return the relevant answer.
 
-### Input
-question: string
+Input:
+question — string
 
-### Example
-search_faq("What are your business hours?")
+Returns:
+Relevant FAQ answer.
 
-### Return
-A relevant FAQ answer as a string.
+### 2. get_leads_by_status(status)
 
----
-
-## Tool 2 — get_leads_by_status()
-
-### Purpose
+Purpose:
 Find leads based on their current status.
 
-### Input
-status: string
+Input:
+status — string
 
-### Example
-get_leads_by_status("interested")
+Returns:
+List of matching leads.
 
-### Return
-A list of leads matching the requested status.
+### 3. draft_followup(name, lead_status, interest)
 
----
-
-## Tool 3 — draft_followup()
-
-### Purpose
+Purpose:
 Create a follow-up message for a lead.
 
-### Input
-name: string
-lead_status: string
-interest: string
+Inputs:
+name — string
+lead_status — string
+interest — string
 
-### Example
-draft_followup("Rahul", "interested", "AI automation")
+Returns:
+Follow-up message draft.
 
-### Return
-A draft follow-up message as a string.
+## Fixed Script vs Tool-Using Agent
 
----
+A fixed script follows a predetermined sequence of steps.
 
-## Fixed Script vs Agent
+A tool-using agent understands the user's goal and chooses the appropriate available tool.
 
-### Fixed Script
-The developer decides the sequence of actions in advance.
+## Routing Examples
 
-Example:
+1. Business hours → search_faq()
+2. Home delivery → search_faq()
+3. Payment methods → search_faq()
+4. Interested leads → get_leads_by_status()
+5. New leads → get_leads_by_status()
+6. Qualified leads → get_leads_by_status()
+7. Follow-up for Rahul → draft_followup()
+8. Message for Priya → draft_followup()
+9. Follow-up for Amit → draft_followup()
+10. Follow-up for an interested lead → draft_followup()
 
-User Request
-↓
-Always run Tool 1
-↓
-Always run Tool 2
-↓
-Return Result
-
-### Tool-Using Agent
-The system understands the user's request and chooses the appropriate tool.
-
-Example:
+## Architecture
 
 User Request
+↓
+Agent
 ↓
 Understand Goal
 ↓
@@ -98,17 +82,16 @@ Execute Tool
 ↓
 Observe Result
 ↓
-Answer
+Final Answer
 
 ## Key Learning
 
-A fixed script follows a predetermined workflow.
-
-A tool-using agent makes a controlled decision about which available tool should be used for the user's request.
+An agent is different from a fixed script because it can select an appropriate tool based on the user's goal.
 
 ## Day 23 Deliverables
 
-- 3 tool definitions
-- Tool inputs and outputs
-- 10 routing examples
-- Agent architecture
+- [x] 3 tool definitions
+- [x] Tool inputs and outputs
+- [x] 10 routing examples
+- [x] Agent architecture
+- [x] Fixed script vs agent understanding

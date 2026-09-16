@@ -1,0 +1,104 @@
+
+DAY 25 — TOOL SELECTION AND EXECUTION PRACTICE
+
+PROJECT 4 — MULTI-TOOL BUSINESS AGENT
+
+MODEL:
+Ollama — llama3:latest
+
+TEST 1
+Request:
+What are your business hours?
+
+Selected:
+search_faq
+
+Result:
+PASS
+
+
+TEST 2
+Request:
+Do you provide home delivery?
+
+Selected:
+search_faq
+
+Result:
+PASS
+
+
+TEST 3
+Request:
+Show interested leads.
+
+Selected:
+get_leads_by_status
+
+Argument:
+status=interested
+
+Result:
+PASS
+2 interested leads returned.
+
+
+TEST 4
+Request:
+Show qualified leads.
+
+Selected:
+get_leads_by_status
+
+Argument:
+status=qualified
+
+Result:
+PASS
+1 qualified lead returned.
+
+
+TEST 5
+Request:
+What payment methods do you accept?
+
+Selected:
+search_faq
+
+Result:
+PASS
+
+
+TEST 6
+Request:
+Prepare a follow-up draft for Priya.
+
+Selected:
+generate_followup_draft
+
+Arguments:
+name=Priya
+lead_status=interested
+interest=chatbot
+
+Result:
+PASS
+
+
+FINAL RESULT:
+
+6/6 successful tool selections and executions
+
+ACCURACY:
+
+100%
+
+
+KEY LEARNING:
+
+The Ollama model can select an appropriate Python tool, provide arguments, execute the tool, and receive structured output.
+
+
+DAY 25 STATUS:
+
+COMPLETE

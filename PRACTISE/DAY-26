@@ -1,0 +1,91 @@
+
+DAY 26 — MULTI-STEP AGENT PRACTICE
+
+PROJECT 4 — MULTI-TOOL BUSINESS AGENT
+
+MODEL:
+Ollama — llama3:latest
+
+
+TASK:
+
+"Show warm leads and prepare a follow-up draft for one."
+
+
+WARM LEAD MAPPING:
+
+warm = interested
+
+
+STEP 1
+
+Tool:
+get_leads_by_status
+
+Input:
+interested
+
+Result:
+2 interested leads found:
+Priya
+Sneha
+
+
+STEP 2
+
+Select one returned lead.
+
+Selected:
+Priya
+
+Priya details:
+Status: interested
+Interest: chatbot
+
+
+STEP 3
+
+Tool:
+generate_followup_draft
+
+Input:
+Name: Priya
+Status: interested
+Interest: chatbot
+
+Result:
+Follow-up draft generated successfully.
+
+
+TOOL SEQUENCE:
+
+get_leads_by_status
+→
+generate_followup_draft
+
+
+MAXIMUM TOOL CALLS:
+
+3
+
+
+ACTUAL TOOL CALLS:
+
+2
+
+
+SAFETY:
+
+Draft only.
+No message was sent.
+No irreversible action was performed.
+
+
+KEY LEARNING:
+
+A multi-step agent can use the output of one tool to determine the input for the next tool.
+
+
+DAY 26 STATUS:
+
+COMPLETE
