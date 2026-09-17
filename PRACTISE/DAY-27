@@ -1,0 +1,27 @@
+DAY 27 PRACTICE
+
+Safety:
+- Allowed actions reviewed.
+- Restricted actions reviewed.
+- Human confirmation requirement reviewed.
+
+Error Handling:
+- Failed tool input tested.
+- Tool returned success=false.
+- Error message was displayed clearly.
+- Failure was logged.
+
+Observability:
+- Request logged.
+- Tool selection logged.
+- Arguments logged.
+- Output logged.
+- Errors logged.
+- Tool sequence logged.
+
+Verification:
+Day 25 = 6/6
+Day 26 = 2 tool calls
+Day 27 failed-tool test = PASS
+
+STATUS: COMPLETE

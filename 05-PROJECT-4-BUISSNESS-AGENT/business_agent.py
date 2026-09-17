@@ -1,6 +1,6 @@
+
 import json
 from datetime import datetime
-
 import requests
 
 from tool_faq import search_faq
@@ -63,8 +63,11 @@ PYTHON_TOOLS = {
 
 
 def write_log(entry):
-    with open(LOG_FILE, "a", encoding="utf-8") as file:
-        file.write(json.dumps(entry) + "\n")
+    try:
+        with open(LOG_FILE, "a", encoding="utf-8") as file:
+            file.write(json.dumps(entry) + "\n")
+    except Exception as error:
+        print(f"Logging error: {error}")
 
 
 def tool_catalog():
@@ -72,32 +75,59 @@ def tool_catalog():
 
 
 def ask_ollama(messages):
-    response = requests.post(
-        OLLAMA_URL,
-        json={
-            "model": MODEL,
-            "messages": messages,
-            "stream": False,
-            "temperature": 0
-        },
-        timeout=120
-    )
+    try:
+        response = requests.post(
+            OLLAMA_URL,
+            json={
+                "model": MODEL,
+                "messages": messages,
+                "stream": False,
+                "temperature": 0
+            },
+            timeout=120
+        )
 
-    response.raise_for_status()
+        response.raise_for_status()
 
-    data = response.json()
+        data = response.json()
 
-    return data["message"]["content"]
+        if "message" not in data:
+            raise ValueError("Ollama returned an invalid response.")
+
+        if "content" not in data["message"]:
+            raise ValueError(
+                "Ollama response does not contain message content."
+            )
+
+        return data["message"]["content"]
+
+    except requests.exceptions.ConnectionError:
+        raise RuntimeError(
+            "Ollama is not running or is unavailable at localhost:11434."
+        )
+
+    except requests.exceptions.Timeout:
+        raise RuntimeError(
+            "Ollama request timed out."
+        )
+
+    except requests.exceptions.HTTPError as error:
+        raise RuntimeError(
+            f"Ollama API returned an HTTP error: {error}"
+        )
+
+    except requests.exceptions.RequestException as error:
+        raise RuntimeError(
+            f"Ollama request failed: {error}"
+        )
+
+    except (ValueError, KeyError, TypeError) as error:
+        raise RuntimeError(
+            f"Invalid response from Ollama: {error}"
+        )
 
 
 def parse_json(text):
-    """
-    Extract the first complete JSON object from the model response.
-
-    This prevents errors when Llama returns extra text or
-    multiple JSON objects.
-    """
-
     text = text.strip()
 
     if text.startswith("```"):
@@ -108,16 +138,13 @@ def parse_json(text):
     start = text.find("{")
 
     if start == -1:
-        raise ValueError(
-            "Model did not return JSON."
-        )
+        raise ValueError("Model did not return JSON.")
 
     depth = 0
     in_string = False
     escape = False
 
     for index in range(start, len(text)):
-
         character = text[index]
 
         if escape:
@@ -145,19 +172,15 @@ def parse_json(text):
                 json_text = text[start:index + 1]
                 return json.loads(json_text)
 
-    raise ValueError(
-        "Model returned incomplete JSON."
-    )
+    raise ValueError("Model returned incomplete JSON.")
 
 
 def normalize_arguments(tool_name, arguments):
+    if not isinstance(arguments, dict):
+        raise ValueError("Tool arguments must be a JSON object.")
 
     if tool_name == "get_leads_by_status":
-
-        status = arguments.get(
-            "status",
-            ""
-        ).strip().lower()
+        status = str(arguments.get("status", "")).strip().lower()
 
         status_map = {
             "warm": "interested",
@@ -175,7 +198,6 @@ def normalize_arguments(tool_name, arguments):
 
 
 def select_tool(request):
-
     system_prompt = f"""
 You are a controlled business-agent router.
 
@@ -224,10 +246,7 @@ Rules:
     result = parse_json(raw_response)
 
     tool_name = result.get("tool")
-    arguments = result.get(
-        "arguments",
-        {}
-    )
+    arguments = result.get("arguments", {})
 
     if tool_name not in PYTHON_TOOLS:
         raise ValueError(
@@ -243,7 +262,6 @@ Rules:
 
 
 def execute_tool(tool_name, arguments):
-
     if tool_name not in PYTHON_TOOLS:
         return {
             "success": False,
@@ -251,33 +269,40 @@ def execute_tool(tool_name, arguments):
         }
 
     try:
-        return PYTHON_TOOLS[tool_name](**arguments)
+        result = PYTHON_TOOLS[tool_name](**arguments)
+
+        if not isinstance(result, dict):
+            return {
+                "success": False,
+                "error": "Tool returned an invalid response format."
+            }
+
+        return result
+
+    except TypeError as error:
+        return {
+            "success": False,
+            "error": f"Invalid tool arguments: {error}"
+        }
 
     except Exception as error:
         return {
             "success": False,
-            "error": str(error)
+            "error": f"Tool execution failed: {error}"
         }
 
 
 def run_single_test(request):
-
     print("=" * 70)
     print("DAY 25 TEST")
     print(f"Request: {request}")
     print()
 
     try:
-
         tool_name, arguments = select_tool(request)
 
-        print(
-            f"Model selected tool: {tool_name}"
-        )
-
-        print(
-            f"Arguments: {json.dumps(arguments)}"
-        )
+        print(f"Model selected tool: {tool_name}")
+        print(f"Arguments: {json.dumps(arguments)}")
 
         result = execute_tool(
             tool_name,
@@ -285,13 +310,15 @@ def run_single_test(request):
         )
 
         print("Tool output:")
+        print(json.dumps(result, indent=2))
 
-        print(
-            json.dumps(
-                result,
-                indent=2
+        if not result.get("success", False):
+            print()
+            print("CLEAR FAILURE RESPONSE:")
+            print(
+                f"The requested tool could not be completed. "
+                f"Reason: {result.get('error', 'Unknown error.')}"
             )
-        )
 
         write_log({
             "timestamp": datetime.now().isoformat(
@@ -305,9 +332,15 @@ def run_single_test(request):
         })
 
     except Exception as error:
-
         print("ERROR:")
         print(str(error))
+        print()
+
+        print("CLEAR FAILURE RESPONSE:")
+        print(
+            f"The agent could not complete the request. "
+            f"Reason: {error}"
+        )
 
         write_log({
             "timestamp": datetime.now().isoformat(
@@ -322,7 +355,6 @@ def run_single_test(request):
 
 
 def run_day25():
-
     tests = [
         "What are your business hours?",
         "Do you provide home delivery?",
@@ -337,250 +369,277 @@ def run_day25():
 
 
 def run_multi_step_task():
-
-    request = (
-        "Show warm leads and prepare a follow-up draft for one."
-    )
+    request = "Show warm leads and prepare a follow-up draft for one."
 
     print("=" * 70)
     print("DAY 26 MULTI-STEP TASK")
     print(f"Request: {request}")
-    print(
-        f"Maximum tool calls: {MAX_TOOL_CALLS}"
-    )
+    print(f"Maximum tool calls: {MAX_TOOL_CALLS}")
     print()
-
-    messages = [
-        {
-            "role": "system",
-            "content": f"""
-You are a controlled business agent.
-
-Available tools:
-
-{tool_catalog()}
-
-Task:
-Show warm leads and prepare a follow-up draft for one.
-
-Rules:
-- Warm leads means interested leads.
-- Therefore use status="interested".
-- First find the interested leads.
-- Select one lead from the returned results.
-- Then generate a follow-up draft for that lead.
-- The follow-up must remain a draft.
-- Never send a message.
-- Never perform an irreversible action.
-- Maximum tool calls: {MAX_TOOL_CALLS}.
-
-Return ONLY ONE JSON OBJECT.
-
-For a tool action:
-
-{{
-    "action": "tool",
-    "tool": "tool_name",
-    "arguments": {{}}
-}}
-
-For the completed task:
-
-{{
-    "action": "final",
-    "answer": "..."
-}}
-"""
-        },
-        {
-            "role": "user",
-            "content": request
-        }
-    ]
 
     tool_calls = 0
     sequence = []
 
-    while tool_calls < MAX_TOOL_CALLS:
+    try:
+        # STEP 1: Find warm leads.
+        tool_calls += 1
 
-        try:
+        tool_name = "get_leads_by_status"
+        arguments = {
+            "status": "interested"
+        }
 
-            raw_response = ask_ollama(messages)
+        sequence.append(tool_name)
 
-            decision = parse_json(
-                raw_response
+        print(f"Step {tool_calls}: {tool_name}")
+        print(f"Arguments: {json.dumps(arguments)}")
+
+        result = execute_tool(
+            tool_name,
+            arguments
+        )
+
+        print("Tool output:")
+        print(json.dumps(result, indent=2))
+        print()
+
+        write_log({
+            "timestamp": datetime.now().isoformat(
+                timespec="seconds"
+            ),
+            "type": "day26_tool_call",
+            "step": tool_calls,
+            "request": request,
+            "selected_tool": tool_name,
+            "arguments": arguments,
+            "output": result
+        })
+
+        if not result.get("success", False):
+            raise RuntimeError(
+                f"Lead lookup failed: {result.get('error')}"
             )
 
-            action = decision.get(
-                "action"
+        leads = result.get("leads", [])
+
+        if not leads:
+            raise RuntimeError(
+                "No warm leads were found."
             )
 
-            if action == "final":
+        # STEP 2: Prepare a draft for the first lead.
+        selected_lead = leads[0]
 
-                answer = decision.get(
-                    "answer",
-                    "Task completed."
-                )
+        tool_calls += 1
 
-                print("FINAL RESPONSE:")
-                print(answer)
-                print()
+        tool_name = "generate_followup_draft"
 
-                write_log({
-                    "timestamp": datetime.now().isoformat(
-                        timespec="seconds"
-                    ),
-                    "type": "day26_final",
-                    "request": request,
-                    "tool_calls_used": tool_calls,
-                    "maximum_tool_calls": MAX_TOOL_CALLS,
-                    "tool_sequence": sequence,
-                    "answer": answer
-                })
+        arguments = {
+            "name": selected_lead["name"],
+            "lead_status": selected_lead["status"],
+            "interest": selected_lead["interest"]
+        }
 
-                return
+        sequence.append(tool_name)
 
-            if action != "tool":
-                raise ValueError(
-                    "Model returned an invalid action."
-                )
+        print(f"Step {tool_calls}: {tool_name}")
+        print(f"Arguments: {json.dumps(arguments)}")
 
-            tool_name = decision.get(
-                "tool"
+        result = execute_tool(
+            tool_name,
+            arguments
+        )
+
+        print("Tool output:")
+        print(json.dumps(result, indent=2))
+        print()
+
+        write_log({
+            "timestamp": datetime.now().isoformat(
+                timespec="seconds"
+            ),
+            "type": "day26_tool_call",
+            "step": tool_calls,
+            "request": request,
+            "selected_tool": tool_name,
+            "arguments": arguments,
+            "output": result
+        })
+
+        if not result.get("success", False):
+            raise RuntimeError(
+                f"Follow-up draft failed: {result.get('error')}"
             )
 
-            arguments = decision.get(
-                "arguments",
-                {}
-            )
+        # FINAL RESPONSE.
+        draft = result.get("draft")
 
-            if tool_name not in PYTHON_TOOLS:
-                raise ValueError(
-                    f"Invalid tool selected: {tool_name}"
-                )
+        print("FINAL RESPONSE:")
+        print({
+            "success": True,
+            "draft": draft
+        })
+        print()
 
-            arguments = normalize_arguments(
-                tool_name,
-                arguments
-            )
+        write_log({
+            "timestamp": datetime.now().isoformat(
+                timespec="seconds"
+            ),
+            "type": "day26_final",
+            "request": request,
+            "tool_calls_used": tool_calls,
+            "maximum_tool_calls": MAX_TOOL_CALLS,
+            "tool_sequence": sequence,
+            "answer": {
+                "success": True,
+                "draft": draft
+            }
+        })
 
-            tool_calls += 1
+    except Exception as error:
+        print("ERROR:")
+        print(str(error))
+        print()
 
-            sequence.append(
-                tool_name
-            )
+        print("CLEAR FAILURE RESPONSE:")
+        print(
+            f"The multi-step task could not be completed. "
+            f"Reason: {error}"
+        )
 
-            print(
-                f"Step {tool_calls}: {tool_name}"
-            )
+        write_log({
+            "timestamp": datetime.now().isoformat(
+                timespec="seconds"
+            ),
+            "type": "day27_error",
+            "request": request,
+            "tool_calls_used": tool_calls,
+            "maximum_tool_calls": MAX_TOOL_CALLS,
+            "tool_sequence": sequence,
+            "error": str(error)
+        })
 
-            print(
-                f"Arguments: {json.dumps(arguments)}"
-            )
 
-            result = execute_tool(
-                tool_name,
-                arguments
-            )
+def run_day27_failed_tool_test():
+    print("=" * 70)
+    print("DAY 27 FAILED TOOL TEST")
+    print()
 
-            print("Tool output:")
+    test_tool = "get_leads_by_status"
+    test_arguments = {
+        "status": ""
+    }
 
-            print(
-                json.dumps(
-                    result,
-                    indent=2
-                )
-            )
+    print(f"Test tool: {test_tool}")
+    print(f"Arguments: {json.dumps(test_arguments)}")
+    print()
 
-            print()
-
-            write_log({
-                "timestamp": datetime.now().isoformat(
-                    timespec="seconds"
-                ),
-                "type": "day26_tool_call",
-                "step": tool_calls,
-                "request": request,
-                "selected_tool": tool_name,
-                "arguments": arguments,
-                "output": result
-            })
-
-            messages.append({
-                "role": "assistant",
-                "content": json.dumps(
-                    decision
-                )
-            })
-
-            messages.append({
-                "role": "user",
-                "content": (
-                    "Tool result:\n"
-                    f"{json.dumps(result)}\n\n"
-                    "Continue the task. "
-                    "Use another tool if required. "
-                    "Otherwise return the final JSON object."
-                )
-            })
-
-        except Exception as error:
-
-            print("ERROR:")
-            print(str(error))
-
-            write_log({
-                "timestamp": datetime.now().isoformat(
-                    timespec="seconds"
-                ),
-                "type": "day26_error",
-                "request": request,
-                "tool_calls_used": tool_calls,
-                "maximum_tool_calls": MAX_TOOL_CALLS,
-                "tool_sequence": sequence,
-                "error": str(error)
-            })
-
-            return
-
-    print(
-        "Maximum tool-call limit reached."
+    result = execute_tool(
+        test_tool,
+        test_arguments
     )
 
-    print(
-        f"Tool calls used: {tool_calls}"
-    )
+    print("Tool output:")
+    print(json.dumps(result, indent=2))
+    print()
 
-    write_log({
-        "timestamp": datetime.now().isoformat(
-            timespec="seconds"
-        ),
-        "type": "day26_limit",
-        "request": request,
-        "tool_calls_used": tool_calls,
-        "maximum_tool_calls": MAX_TOOL_CALLS,
-        "tool_sequence": sequence
-    })
+    if result.get("success") is False:
+        error_message = result.get(
+            "error",
+            "Unknown error."
+        )
+
+        print("FAILURE HANDLED CORRECTLY:")
+        print(
+            f"The requested tool could not be completed. "
+            f"Reason: {error_message}"
+        )
+
+        write_log({
+            "timestamp": datetime.now().isoformat(
+                timespec="seconds"
+            ),
+            "type": "day27_failed_tool_test",
+            "tool": test_tool,
+            "arguments": test_arguments,
+            "result": result,
+            "handled": True
+        })
+
+    else:
+        print(
+            "Unexpected result: failed-tool test did not fail."
+        )
+
+    print()
 
 
 def main():
-
-    print(
-        "PROJECT 4 — MULTI-TOOL BUSINESS AGENT"
-    )
-
-    print(
-        f"Model: {MODEL}"
-    )
-
+    print("PROJECT 4 — MULTI-TOOL BUSINESS AGENT")
+    print(f"Model: {MODEL}")
+    print(f"Maximum tool calls: {MAX_TOOL_CALLS}")
     print()
 
+    print("DAY 25 — NORMAL TOOL TESTS")
     run_day25()
 
-    print()
-
+    print("DAY 26 — MULTI-STEP TEST")
     run_multi_step_task()
+
+    print("DAY 27 — FAILED TOOL TEST")
+    run_day27_failed_tool_test()
 
 
 if __name__ == "__main__":
     main()
+def run_day27_failed_tool_test():
+    print("=" * 70)
+    print("DAY 27 FAILED TOOL TEST")
+    print()
+
+    test_tool = "get_leads_by_status"
+    test_arguments = {
+        "status": ""
+    }
+
+    print(f"Test tool: {test_tool}")
+    print(f"Arguments: {json.dumps(test_arguments)}")
+    print()
+
+    result = execute_tool(
+        test_tool,
+        test_arguments
+    )
+
+    print("Tool output:")
+    print(json.dumps(result, indent=2))
+    print()
+
+    if result.get("success") is False:
+        error_message = result.get(
+            "error",
+            "Unknown error."
+        )
+
+        print("FAILURE HANDLED CORRECTLY:")
+        print(
+            f"The requested tool could not be completed. "
+            f"Reason: {error_message}"
+        )
+
+        write_log({
+            "timestamp": datetime.now().isoformat(
+                timespec="seconds"
+            ),
+            "type": "day27_failed_tool_test",
+            "tool": test_tool,
+            "arguments": test_arguments,
+            "result": result,
+            "handled": True
+        })
+
+    else:
+        print("Unexpected result: failed-tool test did not fail.")
+
+    print()
+

@@ -1,4 +1,4 @@
-@"
+
 # DAY 25 — Connect the Agent to Tools
 
 ## Goal
@@ -137,4 +137,3 @@ An AI agent can use an LLM to understand a request, select a suitable tool, prov
 ## STATUS
 
 COMPLETE
-"@ | Set-Content ".\NOTES\DAY-25.md" -Encoding UTF8
