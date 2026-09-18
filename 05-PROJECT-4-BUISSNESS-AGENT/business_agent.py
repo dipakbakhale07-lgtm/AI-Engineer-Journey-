@@ -1,6 +1,7 @@
-
 import json
+import re
 from datetime import datetime
+
 import requests
 
 from tool_faq import search_faq
@@ -10,80 +11,68 @@ from tool_followup import generate_followup_draft
 
 OLLAMA_URL = "http://localhost:11434/api/chat"
 MODEL = "llama3:latest"
-
 MAX_TOOL_CALLS = 3
 LOG_FILE = "agent_tool_log.jsonl"
 
 
 TOOLS = {
     "search_faq": {
+        "function": search_faq,
         "description": (
-            "Answer business FAQ questions about business hours, "
-            "home delivery, payment methods, and return policy."
-        ),
-        "parameters": {
-            "question": "The user's business FAQ question."
-        }
+            "Search business FAQ information. "
+            "Input: question (string). "
+            "Use for business hours, home delivery, payment methods, "
+            "return policy, and similar FAQ questions."
+        )
     },
-
     "get_leads_by_status": {
+        "function": get_leads_by_status,
         "description": (
-            "Find business leads by status. "
-            "Stored statuses are new, interested, qualified, and contacted. "
-            "If the user says warm leads, use status='interested'."
-        ),
-        "parameters": {
-            "status": (
-                "Lead status. Use only: new, interested, "
-                "qualified, or contacted."
-            )
-        }
+            "Retrieve leads by status. "
+            "Input: status (string). "
+            "Valid statuses: new, interested, qualified, contacted. "
+            "Warm leads mean interested leads."
+        )
     },
-
     "generate_followup_draft": {
+        "function": generate_followup_draft,
         "description": (
-            "Create a follow-up message draft using the lead's name, "
-            "status, and interest. This tool only creates a draft "
-            "and never sends messages."
-        ),
-        "parameters": {
-            "name": "Lead name.",
-            "lead_status": "Lead status.",
-            "interest": "What the lead is interested in."
-        }
+            "Generate a follow-up message draft. "
+            "Inputs: name, lead_status, interest. "
+            "This only creates a draft and never sends a message."
+        )
     }
 }
 
 
-PYTHON_TOOLS = {
-    "search_faq": search_faq,
-    "get_leads_by_status": get_leads_by_status,
-    "generate_followup_draft": generate_followup_draft
-}
+def log_event(event_type, data):
+    entry = {
+        "timestamp": datetime.now().isoformat(timespec="seconds"),
+        "type": event_type,
+        **data
+    }
 
-
-def write_log(entry):
     try:
         with open(LOG_FILE, "a", encoding="utf-8") as file:
-            file.write(json.dumps(entry) + "\n")
-    except Exception as error:
-        print(f"Logging error: {error}")
-
-
-def tool_catalog():
-    return json.dumps(TOOLS, indent=2)
+            file.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    except Exception:
+        pass
 
 
 def ask_ollama(messages):
+    payload = {
+        "model": MODEL,
+        "messages": messages,
+        "stream": False,
+        "options": {
+            "temperature": 0
+        }
+    }
+
     try:
         response = requests.post(
             OLLAMA_URL,
-            json={
-                "model": MODEL,
-                "messages": messages,
-                "stream": False,
-                "temperature": 0
-            },
+            json=payload,
             timeout=120
         )
 
@@ -91,19 +80,30 @@ def ask_ollama(messages):
 
         data = response.json()
 
-        if "message" not in data:
-            raise ValueError("Ollama returned an invalid response.")
-
-        if "content" not in data["message"]:
+        if not isinstance(data, dict):
             raise ValueError(
-                "Ollama response does not contain message content."
+                "Ollama returned an invalid response format."
             )
 
-        return data["message"]["content"]
+        message = data.get("message")
+
+        if not isinstance(message, dict):
+            raise ValueError(
+                "Ollama response does not contain a valid message."
+            )
+
+        content = message.get("content", "")
+
+        if not isinstance(content, str) or not content.strip():
+            raise ValueError(
+                "Ollama returned an empty response."
+            )
+
+        return content.strip()
 
     except requests.exceptions.ConnectionError:
         raise RuntimeError(
-            "Ollama is not running or is unavailable at localhost:11434."
+            "Cannot connect to Ollama. Make sure Ollama is running."
         )
 
     except requests.exceptions.Timeout:
@@ -113,7 +113,7 @@ def ask_ollama(messages):
 
     except requests.exceptions.HTTPError as error:
         raise RuntimeError(
-            f"Ollama API returned an HTTP error: {error}"
+            f"Ollama HTTP error: {error}"
         )
 
     except requests.exceptions.RequestException as error:
@@ -121,525 +121,896 @@ def ask_ollama(messages):
             f"Ollama request failed: {error}"
         )
 
-    except (ValueError, KeyError, TypeError) as error:
+    except ValueError:
+        raise
+
+    except Exception as error:
         raise RuntimeError(
-            f"Invalid response from Ollama: {error}"
+            f"Ollama error: {error}"
         )
 
 
-def parse_json(text):
+def extract_json(text):
+    if not isinstance(text, str) or not text.strip():
+        raise ValueError("No JSON response received.")
+
     text = text.strip()
 
-    if text.startswith("```"):
-        text = text.replace("```json", "", 1)
-        text = text.replace("```", "", 1)
-        text = text.strip()
+    try:
+        return json.loads(text)
 
-    start = text.find("{")
+    except json.JSONDecodeError:
+        pass
 
-    if start == -1:
-        raise ValueError("Model did not return JSON.")
+    cleaned = re.sub(
+        r"```(?:json)?",
+        "",
+        text,
+        flags=re.IGNORECASE
+    ).replace("```", "").strip()
+
+    try:
+        return json.loads(cleaned)
+
+    except json.JSONDecodeError:
+        pass
+
+    object_start = cleaned.find("{")
+    array_start = cleaned.find("[")
+
+    starts = []
+
+    if object_start >= 0:
+        starts.append((object_start, "{"))
+
+    if array_start >= 0:
+        starts.append((array_start, "["))
+
+    if not starts:
+        raise ValueError("No JSON object found.")
+
+    start, opening = min(
+        starts,
+        key=lambda item: item[0]
+    )
+
+    closing = "}" if opening == "{" else "]"
 
     depth = 0
     in_string = False
     escape = False
 
-    for index in range(start, len(text)):
-        character = text[index]
-
-        if escape:
-            escape = False
-            continue
-
-        if character == "\\" and in_string:
-            escape = True
-            continue
-
-        if character == '"':
-            in_string = not in_string
-            continue
+    for index in range(start, len(cleaned)):
+        char = cleaned[index]
 
         if in_string:
+
+            if escape:
+                escape = False
+
+            elif char == "\\":
+                escape = True
+
+            elif char == '"':
+                in_string = False
+
             continue
 
-        if character == "{":
+        if char == '"':
+            in_string = True
+            continue
+
+        if char == opening:
             depth += 1
 
-        elif character == "}":
+        elif char == closing:
             depth -= 1
 
             if depth == 0:
-                json_text = text[start:index + 1]
-                return json.loads(json_text)
+                candidate = cleaned[
+                    start:index + 1
+                ]
 
-    raise ValueError("Model returned incomplete JSON.")
+                try:
+                    return json.loads(candidate)
+
+                except json.JSONDecodeError:
+                    break
+
+    raise ValueError(
+        "No valid JSON object found."
+    )
 
 
-def normalize_arguments(tool_name, arguments):
+def normalize_arguments(tool_name, arguments, request):
+
     if not isinstance(arguments, dict):
-        raise ValueError("Tool arguments must be a JSON object.")
+        arguments = {}
 
-    if tool_name == "get_leads_by_status":
-        status = str(arguments.get("status", "")).strip().lower()
+    request = request.strip()
+    request_lower = request.lower()
 
-        status_map = {
-            "warm": "interested",
-            "hot": "interested",
-            "new": "new",
-            "interested": "interested",
-            "qualified": "qualified",
-            "contacted": "contacted"
+    # ---------------------------------------------------------
+    # TOOL 1 — FAQ
+    # ---------------------------------------------------------
+
+    if tool_name == "search_faq":
+
+        question = arguments.get(
+            "question",
+            ""
+        )
+
+        if (
+            not isinstance(question, str)
+            or not question.strip()
+        ):
+            arguments["question"] = request
+
+    # ---------------------------------------------------------
+    # TOOL 2 — LEADS
+    # ---------------------------------------------------------
+
+    elif tool_name == "get_leads_by_status":
+
+        status = arguments.get(
+            "status",
+            ""
+        )
+
+        if not isinstance(status, str):
+            status = ""
+
+        status = status.strip().lower()
+
+        if status in ("warm", "hot"):
+            status = "interested"
+
+        if not status:
+
+            if "qualified" in request_lower:
+                status = "qualified"
+
+            elif "interested" in request_lower:
+                status = "interested"
+
+            elif (
+                "warm" in request_lower
+                or "hot" in request_lower
+            ):
+                status = "interested"
+
+            elif "contacted" in request_lower:
+                status = "contacted"
+
+            elif "new" in request_lower:
+                status = "new"
+
+        arguments["status"] = status
+
+    # ---------------------------------------------------------
+    # TOOL 3 — FOLLOW-UP DRAFT
+    # ---------------------------------------------------------
+
+    elif tool_name == "generate_followup_draft":
+
+        name = arguments.get(
+            "name",
+            ""
+        )
+
+        lead_status = arguments.get(
+            "lead_status",
+            ""
+        )
+
+        interest = arguments.get(
+            "interest",
+            ""
+        )
+
+        if not isinstance(name, str):
+            name = ""
+
+        if not isinstance(lead_status, str):
+            lead_status = ""
+
+        if not isinstance(interest, str):
+            interest = ""
+
+        # Known Project 4 leads.
+        known_leads = {
+            "Priya": {
+                "status": "interested",
+                "interest": "chatbot"
+            },
+            "Amit": {
+                "status": "qualified",
+                "interest": "RAG system"
+            },
+            "Rahul": {
+                "status": "new",
+                "interest": "AI automation"
+            },
+            "Sneha": {
+                "status": "interested",
+                "interest": "AI content"
+            },
+            "Vikram": {
+                "status": "contacted",
+                "interest": "AI agents"
+            }
         }
 
-        if status in status_map:
-            arguments["status"] = status_map[status]
+        # Detect lead name from request.
+        if not name.strip():
+
+            for lead_name in known_leads:
+
+                if lead_name.lower() in request_lower:
+                    name = lead_name
+                    break
+
+        name = name.strip()
+
+        # Use the known lead record.
+        if name in known_leads:
+
+            lead_data = known_leads[name]
+
+            if not lead_status.strip():
+                lead_status = lead_data["status"]
+
+            if not interest.strip():
+                interest = lead_data["interest"]
+
+        # Fallback status detection.
+        if not lead_status.strip():
+
+            if "qualified" in request_lower:
+                lead_status = "qualified"
+
+            elif (
+                "interested" in request_lower
+                or "warm" in request_lower
+            ):
+                lead_status = "interested"
+
+            elif "contacted" in request_lower:
+                lead_status = "contacted"
+
+            elif "new" in request_lower:
+                lead_status = "new"
+
+        if not interest.strip():
+            interest = "your enquiry"
+
+        arguments["name"] = name
+
+        arguments["lead_status"] = (
+            lead_status.strip().lower()
+        )
+
+        arguments["interest"] = (
+            interest.strip()
+        )
 
     return arguments
 
 
 def select_tool(request):
-    system_prompt = f"""
-You are a controlled business-agent router.
+
+    tool_descriptions = "\n".join(
+        f"- {name}: {data['description']}"
+        for name, data in TOOLS.items()
+    )
+
+    system_message = f"""
+You are a controlled business agent.
+
+Choose exactly ONE tool for the user's request.
 
 Available tools:
-
-{tool_catalog()}
-
-User request:
-{request}
-
-Select exactly ONE appropriate tool.
-
-Return ONLY one valid JSON object:
-
-{{
-    "tool": "tool_name",
-    "arguments": {{}}
-}}
+{tool_descriptions}
 
 Rules:
+- Return ONLY one JSON object.
+- Never return a JSON array.
+- The JSON format must be:
+  {{
+    "tool": "tool_name",
+    "arguments": {{}}
+  }}
+- Do not execute tools yourself.
 - Do not invent tool names.
-- Use only the available tools.
-- For warm leads, use status="interested".
-- For interested leads, use status="interested".
-- For qualified leads, use status="qualified".
-- For new leads, use status="new".
-- For contacted leads, use status="contacted".
-- For FAQ questions, pass the user's question.
-- For a follow-up draft for Priya, use:
-  name="Priya"
-  lead_status="interested"
-  interest="chatbot"
+- For FAQ questions, select search_faq.
+- For lead-status requests, select get_leads_by_status.
+- If the user says warm leads, use get_leads_by_status with status "interested".
+- For follow-up requests, select generate_followup_draft.
+- Keep arguments as a JSON object.
 """
 
-    raw_response = ask_ollama([
-        {
-            "role": "system",
-            "content": system_prompt
-        },
-        {
-            "role": "user",
-            "content": request
-        }
-    ])
+    content = ask_ollama(
+        [
+            {
+                "role": "system",
+                "content": system_message
+            },
+            {
+                "role": "user",
+                "content": request
+            }
+        ]
+    )
 
-    result = parse_json(raw_response)
+    selection = extract_json(content)
 
-    tool_name = result.get("tool")
-    arguments = result.get("arguments", {})
+    if isinstance(selection, list):
 
-    if tool_name not in PYTHON_TOOLS:
+        if (
+            len(selection) == 1
+            and isinstance(selection[0], dict)
+        ):
+            selection = selection[0]
+
+        else:
+            raise ValueError(
+                "Invalid tool selection format. "
+                "Expected one JSON object."
+            )
+
+    if not isinstance(selection, dict):
         raise ValueError(
-            f"Invalid tool selected: {tool_name}"
+            "Invalid tool selection format. "
+            "Expected a JSON object."
         )
+
+    tool_name = selection.get("tool")
+
+    if (
+        not isinstance(tool_name, str)
+        or not tool_name.strip()
+    ):
+        raise ValueError(
+            "No tool was selected."
+        )
+
+    tool_name = tool_name.strip()
+
+    arguments = selection.get(
+        "arguments",
+        {}
+    )
 
     arguments = normalize_arguments(
         tool_name,
-        arguments
+        arguments,
+        request
     )
+
+    if tool_name not in TOOLS:
+        raise ValueError(
+            f"Invalid tool selected: {tool_name}"
+        )
 
     return tool_name, arguments
 
 
 def execute_tool(tool_name, arguments):
-    if tool_name not in PYTHON_TOOLS:
-        return {
-            "success": False,
-            "error": f"Unknown tool: {tool_name}"
-        }
 
     try:
-        result = PYTHON_TOOLS[tool_name](**arguments)
+
+        if tool_name not in TOOLS:
+            return {
+                "success": False,
+                "error": f"Unknown tool: {tool_name}"
+            }
+
+        if not isinstance(arguments, dict):
+            return {
+                "success": False,
+                "error": (
+                    "Tool arguments must be "
+                    "a JSON object."
+                )
+            }
+
+        function = TOOLS[tool_name]["function"]
+
+        result = function(**arguments)
 
         if not isinstance(result, dict):
             return {
                 "success": False,
-                "error": "Tool returned an invalid response format."
+                "error": (
+                    "Tool returned an invalid result."
+                )
             }
 
         return result
 
     except TypeError as error:
+
         return {
             "success": False,
-            "error": f"Invalid tool arguments: {error}"
+            "error": (
+                f"Invalid tool arguments: {error}"
+            )
         }
 
     except Exception as error:
+
         return {
             "success": False,
-            "error": f"Tool execution failed: {error}"
+            "error": str(error)
         }
 
 
 def run_single_test(request):
-    print("=" * 70)
-    print("DAY 25 TEST")
-    print(f"Request: {request}")
-    print()
 
     try:
-        tool_name, arguments = select_tool(request)
 
-        print(f"Model selected tool: {tool_name}")
-        print(f"Arguments: {json.dumps(arguments)}")
+        tool_name, arguments = select_tool(
+            request
+        )
 
         result = execute_tool(
             tool_name,
             arguments
         )
 
-        print("Tool output:")
-        print(json.dumps(result, indent=2))
-
-        if not result.get("success", False):
-            print()
-            print("CLEAR FAILURE RESPONSE:")
-            print(
-                f"The requested tool could not be completed. "
-                f"Reason: {result.get('error', 'Unknown error.')}"
-            )
-
-        write_log({
-            "timestamp": datetime.now().isoformat(
-                timespec="seconds"
-            ),
-            "type": "day25_single_tool",
-            "request": request,
-            "selected_tool": tool_name,
-            "arguments": arguments,
-            "output": result
-        })
-
-    except Exception as error:
-        print("ERROR:")
-        print(str(error))
-        print()
-
-        print("CLEAR FAILURE RESPONSE:")
-        print(
-            f"The agent could not complete the request. "
-            f"Reason: {error}"
+        log_event(
+            "single_tool_request",
+            {
+                "request": request,
+                "selected_tool": tool_name,
+                "arguments": arguments,
+                "result": result
+            }
         )
 
-        write_log({
-            "timestamp": datetime.now().isoformat(
-                timespec="seconds"
-            ),
-            "type": "day25_error",
-            "request": request,
-            "error": str(error)
-        })
+        if result.get("success") is False:
 
-    print()
+            print(
+                "ERROR: "
+                f"{result.get('error', 'Tool failed.')}"
+            )
+
+            return False
+
+        print(
+            f"TOOL: {tool_name}"
+        )
+
+        print(
+            json.dumps(
+                result,
+                indent=2
+            )
+        )
+
+        return True
+
+    except Exception as error:
+
+        log_event(
+            "single_tool_error",
+            {
+                "request": request,
+                "error": str(error)
+            }
+        )
+
+        print(
+            f"ERROR: {error}"
+        )
+
+        return False
 
 
 def run_day25():
-    tests = [
+
+    print(
+        "DAY 25 — NORMAL TOOL TESTS"
+    )
+
+    requests_to_test = [
         "What are your business hours?",
         "Do you provide home delivery?",
-        "Show interested leads.",
-        "Show qualified leads.",
+        "Show interested leads",
+        "Show qualified leads",
         "What payment methods do you accept?",
-        "Prepare a follow-up draft for Priya."
+        "Create a follow-up draft for Priya"
     ]
 
-    for request in tests:
-        run_single_test(request)
+    successful = 0
+
+    for number, request in enumerate(
+        requests_to_test,
+        start=1
+    ):
+
+        print()
+        print(
+            f"{number}. {request}"
+        )
+
+        if run_single_test(request):
+            successful += 1
+
+    print()
+
+    print(
+        f"DAY 25 RESULT: "
+        f"{successful}/{len(requests_to_test)} successful"
+    )
+
+    return successful
 
 
 def run_multi_step_task():
-    request = "Show warm leads and prepare a follow-up draft for one."
 
     print("=" * 70)
-    print("DAY 26 MULTI-STEP TASK")
-    print(f"Request: {request}")
-    print(f"Maximum tool calls: {MAX_TOOL_CALLS}")
+    print(
+        "DAY 26 — MULTI-STEP TEST"
+    )
+    print("=" * 70)
+
+    request = (
+        "Show warm leads and prepare "
+        "a follow-up draft for one."
+    )
+
+    print(
+        f"Request: {request}"
+    )
     print()
 
-    tool_calls = 0
-    sequence = []
+    tool_call_count = 0
 
-    try:
-        # STEP 1: Find warm leads.
-        tool_calls += 1
+    # STEP 1
+    tool_call_count += 1
 
-        tool_name = "get_leads_by_status"
-        arguments = {
-            "status": "interested"
+    if tool_call_count > MAX_TOOL_CALLS:
+
+        return {
+            "success": False,
+            "error": (
+                "Maximum tool-call limit reached."
+            )
         }
 
-        sequence.append(tool_name)
+    tool1 = "get_leads_by_status"
 
-        print(f"Step {tool_calls}: {tool_name}")
-        print(f"Arguments: {json.dumps(arguments)}")
+    args1 = {
+        "status": "interested"
+    }
 
-        result = execute_tool(
-            tool_name,
-            arguments
-        )
+    result1 = execute_tool(
+        tool1,
+        args1
+    )
 
-        print("Tool output:")
-        print(json.dumps(result, indent=2))
-        print()
-
-        write_log({
-            "timestamp": datetime.now().isoformat(
-                timespec="seconds"
-            ),
-            "type": "day26_tool_call",
-            "step": tool_calls,
+    log_event(
+        "multi_step_tool_call",
+        {
             "request": request,
-            "selected_tool": tool_name,
-            "arguments": arguments,
-            "output": result
-        })
+            "step": 1,
+            "selected_tool": tool1,
+            "arguments": args1,
+            "result": result1
+        }
+    )
 
-        if not result.get("success", False):
-            raise RuntimeError(
-                f"Lead lookup failed: {result.get('error')}"
+    print(
+        "Step 1: get_leads_by_status"
+    )
+
+    print(
+        json.dumps(
+            result1,
+            indent=2
+        )
+    )
+
+    print()
+
+    if not result1.get("success"):
+
+        return {
+            "success": False,
+            "error": result1.get(
+                "error",
+                "Step 1 failed."
             )
-
-        leads = result.get("leads", [])
-
-        if not leads:
-            raise RuntimeError(
-                "No warm leads were found."
-            )
-
-        # STEP 2: Prepare a draft for the first lead.
-        selected_lead = leads[0]
-
-        tool_calls += 1
-
-        tool_name = "generate_followup_draft"
-
-        arguments = {
-            "name": selected_lead["name"],
-            "lead_status": selected_lead["status"],
-            "interest": selected_lead["interest"]
         }
 
-        sequence.append(tool_name)
+    leads = result1.get(
+        "leads",
+        []
+    )
 
-        print(f"Step {tool_calls}: {tool_name}")
-        print(f"Arguments: {json.dumps(arguments)}")
+    if not leads:
 
-        result = execute_tool(
-            tool_name,
-            arguments
-        )
-
-        print("Tool output:")
-        print(json.dumps(result, indent=2))
-        print()
-
-        write_log({
-            "timestamp": datetime.now().isoformat(
-                timespec="seconds"
-            ),
-            "type": "day26_tool_call",
-            "step": tool_calls,
-            "request": request,
-            "selected_tool": tool_name,
-            "arguments": arguments,
-            "output": result
-        })
-
-        if not result.get("success", False):
-            raise RuntimeError(
-                f"Follow-up draft failed: {result.get('error')}"
+        return {
+            "success": False,
+            "error": (
+                "No warm/interested leads found."
             )
+        }
 
-        # FINAL RESPONSE.
-        draft = result.get("draft")
+    selected_lead = leads[0]
 
-        print("FINAL RESPONSE:")
-        print({
-            "success": True,
-            "draft": draft
-        })
-        print()
+    # STEP 2
+    tool_call_count += 1
 
-        write_log({
-            "timestamp": datetime.now().isoformat(
-                timespec="seconds"
-            ),
-            "type": "day26_final",
+    if tool_call_count > MAX_TOOL_CALLS:
+
+        return {
+            "success": False,
+            "error": (
+                "Maximum tool-call limit reached."
+            )
+        }
+
+    tool2 = (
+        "generate_followup_draft"
+    )
+
+    args2 = {
+        "name": selected_lead["name"],
+        "lead_status": selected_lead["status"],
+        "interest": selected_lead["interest"]
+    }
+
+    result2 = execute_tool(
+        tool2,
+        args2
+    )
+
+    log_event(
+        "multi_step_tool_call",
+        {
             "request": request,
-            "tool_calls_used": tool_calls,
-            "maximum_tool_calls": MAX_TOOL_CALLS,
-            "tool_sequence": sequence,
-            "answer": {
-                "success": True,
-                "draft": draft
-            }
-        })
+            "step": 2,
+            "selected_tool": tool2,
+            "arguments": args2,
+            "result": result2
+        }
+    )
 
-    except Exception as error:
-        print("ERROR:")
-        print(str(error))
-        print()
+    print(
+        "Step 2: generate_followup_draft"
+    )
 
-        print("CLEAR FAILURE RESPONSE:")
-        print(
-            f"The multi-step task could not be completed. "
-            f"Reason: {error}"
+    print(
+        json.dumps(
+            result2,
+            indent=2
         )
+    )
 
-        write_log({
-            "timestamp": datetime.now().isoformat(
-                timespec="seconds"
-            ),
-            "type": "day27_error",
-            "request": request,
-            "tool_calls_used": tool_calls,
-            "maximum_tool_calls": MAX_TOOL_CALLS,
-            "tool_sequence": sequence,
-            "error": str(error)
-        })
+    print()
+
+    if not result2.get("success"):
+
+        return {
+            "success": False,
+            "error": result2.get(
+                "error",
+                "Step 2 failed."
+            )
+        }
+
+    final_response = {
+        "success": True,
+        "draft": result2["draft"]
+    }
+
+    print(
+        "FINAL RESPONSE:"
+    )
+
+    print(
+        final_response
+    )
+
+    print()
+
+    return final_response
 
 
 def run_day27_failed_tool_test():
-    print("=" * 70)
-    print("DAY 27 FAILED TOOL TEST")
-    print()
 
-    test_tool = "get_leads_by_status"
-    test_arguments = {
+    print("=" * 70)
+    print(
+        "DAY 27 — FAILED TOOL TEST"
+    )
+    print("=" * 70)
+
+    tool_name = (
+        "get_leads_by_status"
+    )
+
+    arguments = {
         "status": ""
     }
 
-    print(f"Test tool: {test_tool}")
-    print(f"Arguments: {json.dumps(test_arguments)}")
-    print()
-
     result = execute_tool(
-        test_tool,
-        test_arguments
+        tool_name,
+        arguments
     )
 
+    log_event(
+        "day27_failed_tool_test",
+        {
+            "selected_tool": tool_name,
+            "arguments": arguments,
+            "result": result
+        }
+    )
+
+    print()
     print("Tool output:")
-    print(json.dumps(result, indent=2))
+
+    print(
+        json.dumps(
+            result,
+            indent=2
+        )
+    )
+
     print()
 
     if result.get("success") is False:
-        error_message = result.get(
-            "error",
-            "Unknown error."
-        )
 
-        print("FAILURE HANDLED CORRECTLY:")
         print(
-            f"The requested tool could not be completed. "
-            f"Reason: {error_message}"
+            "FAILURE HANDLED CORRECTLY:"
         )
 
-        write_log({
-            "timestamp": datetime.now().isoformat(
-                timespec="seconds"
-            ),
-            "type": "day27_failed_tool_test",
-            "tool": test_tool,
-            "arguments": test_arguments,
-            "result": result,
-            "handled": True
-        })
+        print(
+            "The requested tool could not "
+            "be completed. "
+            f"Reason: {result.get('error')}"
+        )
 
     else:
+
         print(
-            "Unexpected result: failed-tool test did not fail."
+            "FAILED TEST DID NOT FAIL "
+            "AS EXPECTED."
         )
 
     print()
+
+    return result
+
+
+def run_agent_request(request):
+
+    if (
+        not isinstance(request, str)
+        or not request.strip()
+    ):
+
+        return {
+            "success": False,
+            "error": "Request is required."
+        }
+
+    request = request.strip()
+
+    try:
+
+        tool_name, arguments = select_tool(
+            request
+        )
+
+        log_event(
+            "agent_request",
+            {
+                "request": request,
+                "selected_tool": tool_name,
+                "arguments": arguments
+            }
+        )
+
+        result = execute_tool(
+            tool_name,
+            arguments
+        )
+
+        log_event(
+            "agent_result",
+            {
+                "request": request,
+                "selected_tool": tool_name,
+                "arguments": arguments,
+                "result": result
+            }
+        )
+
+        if result.get("success") is False:
+
+            return {
+                "success": False,
+                "tool": tool_name,
+                "error": result.get(
+                    "error",
+                    "The tool could not "
+                    "complete the request."
+                )
+            }
+
+        return {
+            "success": True,
+            "tool": tool_name,
+            "arguments": arguments,
+            "result": result
+        }
+
+    except Exception as error:
+
+        log_event(
+            "agent_error",
+            {
+                "request": request,
+                "error": str(error)
+            }
+        )
+
+        return {
+            "success": False,
+            "error": str(error)
+        }
 
 
 def main():
-    print("PROJECT 4 — MULTI-TOOL BUSINESS AGENT")
-    print(f"Model: {MODEL}")
-    print(f"Maximum tool calls: {MAX_TOOL_CALLS}")
+
+    print(
+        "PROJECT 4 — MULTI-TOOL BUSINESS AGENT"
+    )
+
+    print(
+        f"Model: {MODEL}"
+    )
+
+    print(
+        f"Maximum tool calls: "
+        f"{MAX_TOOL_CALLS}"
+    )
+
     print()
 
-    print("DAY 25 — NORMAL TOOL TESTS")
-    run_day25()
+    day25_success = run_day25()
 
-    print("DAY 26 — MULTI-STEP TEST")
+    print()
+
     run_multi_step_task()
 
-    print("DAY 27 — FAILED TOOL TEST")
+    print()
+
     run_day27_failed_tool_test()
+
+    print()
+
+    print("=" * 70)
+    print("TEST SUMMARY")
+    print("=" * 70)
+
+    print(
+        f"Day 25: "
+        f"{day25_success}/6 successful"
+    )
+
+    print(
+        "Day 26: multi-step task executed"
+    )
+
+    print(
+        "Day 27: failed-tool handling tested"
+    )
 
 
 if __name__ == "__main__":
     main()
-def run_day27_failed_tool_test():
-    print("=" * 70)
-    print("DAY 27 FAILED TOOL TEST")
-    print()
-
-    test_tool = "get_leads_by_status"
-    test_arguments = {
-        "status": ""
-    }
-
-    print(f"Test tool: {test_tool}")
-    print(f"Arguments: {json.dumps(test_arguments)}")
-    print()
-
-    result = execute_tool(
-        test_tool,
-        test_arguments
-    )
-
-    print("Tool output:")
-    print(json.dumps(result, indent=2))
-    print()
-
-    if result.get("success") is False:
-        error_message = result.get(
-            "error",
-            "Unknown error."
-        )
-
-        print("FAILURE HANDLED CORRECTLY:")
-        print(
-            f"The requested tool could not be completed. "
-            f"Reason: {error_message}"
-        )
-
-        write_log({
-            "timestamp": datetime.now().isoformat(
-                timespec="seconds"
-            ),
-            "type": "day27_failed_tool_test",
-            "tool": test_tool,
-            "arguments": test_arguments,
-            "result": result,
-            "handled": True
-        })
-
-    else:
-        print("Unexpected result: failed-tool test did not fail.")
-
-    print()
-

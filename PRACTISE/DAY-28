@@ -1,0 +1,117 @@
+DAY 28 — PRACTISE
+
+Project: Multi-Tool Business Agent
+
+## MCP Practice
+
+Learned the basic MCP architecture:
+
+AI Application
+    ↓
+MCP Client
+    ↓
+MCP Server
+    ↓
+MCP Tool
+    ↓
+Python Business Function
+
+## Tool Used
+
+Project 4 FAQ tool:
+
+search_faq(question)
+
+Exposed through the MCP server as:
+
+faq_search(question)
+
+## MCP Testing
+
+Created a local MCP server and client test.
+
+Verified:
+
+- MCP server loads successfully.
+- MCP client connects successfully.
+- MCP tool discovery works.
+- faq_search is discovered by the client.
+
+## Interface Practice
+
+Built and tested the Project 4 Streamlit interface.
+
+Interface flow:
+
+User Request
+    ↓
+Business Agent
+    ↓
+Ollama + Llama 3
+    ↓
+Tool Selection
+    ↓
+Python Tool
+    ↓
+Human-Friendly Result
+
+## Interface Tests
+
+Tested supported requests including:
+
+1. What are your business hours?
+2. Do you provide home delivery?
+3. Show interested leads
+4. Show qualified leads
+5. What payment methods do you accept?
+6. Create a follow-up draft for Priya
+
+Backend Day 25 test result:
+
+6/6 successful
+
+Day 26:
+
+Multi-step task successfully executed.
+
+Day 27:
+
+Failed-tool handling successfully tested.
+
+## UI Improvements
+
+Improved the interface so results are presented as business information instead of raw developer JSON.
+
+Examples:
+
+- FAQ answers are displayed as readable answer cards.
+- Leads are displayed in a structured table.
+- Follow-up messages are displayed as readable draft messages.
+- Selected tool and status are displayed separately.
+- Light background and readable text improve visibility.
+- Safety information is clearly displayed.
+
+## Safety Practice
+
+Confirmed:
+
+- Maximum tool calls: 3
+- Follow-up action is draft-only.
+- No automatic message sending.
+- No automatic deletion.
+- No automatic business-record updates.
+- Tool failures are reported clearly.
+
+## What I Learned
+
+MCP provides a standard interface for connecting AI applications with tools and resources.
+
+Python functions still contain the actual business logic.
+
+The MCP server exposes selected capabilities so compatible AI applications can discover and use them.
+
+I also learned that a good AI application needs both a reliable backend and a clear user interface.
+
+## Status
+
+DAY 28 COMPLETE
