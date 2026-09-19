@@ -8,11 +8,8 @@ The goal of this repository is not only to write AI code, but to understand how 
 | **Project**                                    | **Skills Learned**                                                                  | **Status**       |
 | ---------------------------------------------- | ----------------------------------------------------------------------------------- | ---------------- |
 | 🤖 **Project 1 — RAG Knowledge Assistant**     | RAG • Document Processing • Embeddings • Retrieval • LLMs • Prompt Engineering      | 🟢 **Completed** |
-
 | 🎯 **Project 2 — AI Lead Qualification Agent** | AI Agents • Tool Calling • Agent Workflows • Lead Analysis • JSON • Logging         | 🟢 **Completed** |
-
 | 📱 **Project 3 — AI Social Assistant**         | Content Generation • Prompt Engineering • Evaluation • Revision • Structured Output | 🟢 **Completed** |
-
 | ⚙️ **Project 4 — AI Business Agent**           | AI Agents • Tool Integration • APIs • Business Automation • Error Handling          | 🟢 **Completed** |
 
 
