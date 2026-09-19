@@ -1,93 +1,151 @@
-# AI Engineer Journey
+# 🚀 AI Engineer Journey
 
+A practical 30-day AI Builder Journey focused on learning by building, testing, explaining, and improving real AI projects.
 
+The goal of this repository is not only to write AI code, but to understand how AI systems are designed, tested, documented, and improved.
 
-A 30-day AI builder practical course where you will build AI and make it explainable.
+---
 
+## 👨‍💻 About
 
+I am building my foundation toward becoming an AI Engineer through hands-on projects involving:
 
-## How the Journey is Structured
+- Python
+- Large Language Models (LLMs)
+- Generative AI
+- Prompt Engineering
+- Retrieval-Augmented Generation (RAG)
+- AI Agents
+- Tool Use
+- MCP
+- Streamlit
+- Structured AI workflows
+- Testing and evaluation
+- Git & GitHub
 
+My approach throughout the journey:
 
+**BUILD → TEST → EXPLAIN → SHARE → IMPROVE**
 
-### Foundation (Learning, documentation, Git/GitHub, AI concepts, coding, and debugging practice)
+---
 
+# 📚 Projects
 
+## 1️⃣ RAG Knowledge Assistant
 
-#### Project 1 - RAG Knowledge Assistant
+**Folder:** `02-PROJECT-1-RAG`
 
+### Problem
 
+Build a document-based AI assistant that retrieves relevant information before generating an answer.
 
-Build a document-based assistant that will pull out relevant information before answering.
+### What I Built
 
+A RAG-based knowledge assistant that works with a set of AI-related documents and provides answers based on retrieved information.
 
+### Main Concepts
 
-#### Project 2 - AI Lead Qualification Agent
+- Document processing
+- Embeddings
+- Retrieval
+- Context
+- LLM-based answering
+- Grounded responses
+- Testing and evaluation
 
+### Project Evidence
 
+The project contains:
 
-Build an AI-assisted qualification process for leads that classifies and prepares information for follow-up.
+- RAG implementation
+- Streamlit interface
+- Test questions
+- Test answers
+- Evaluation material
+- Example documents
+- Screenshots
 
+### Technologies
 
+**Python • RAG • LLM • Embeddings • Streamlit**
 
-#### Project 3 - AI Social Media Assistant
+### Limitation
 
+The system is based on the documents and implementation available in this project version. Retrieval quality and answer quality can still be improved.
 
+---
 
-Make a social media posting agent that will take your learning and project experience, review them, and turn them into a post.
+# 2️⃣ AI Lead Qualification Agent
 
+**Folder:** `03-PROJECT-2-LEAD-AGENT`
 
+### Problem
 
-#### Project 4 - Multi-Tool Business Agent
+Businesses receive enquiries that need to be classified and prepared for follow-up.
 
+### What I Built
 
+A Python-based AI-assisted lead qualification workflow that processes lead information, classifies leads, and supports follow-up preparation.
 
-A controlled business assistant AI agent that will be able to choose between tools to complete a task.
+### Main Concepts
 
+- Lead classification
+- Structured AI output
+- Classification rules
+- Follow-up logic
+- Dummy/test lead data
+- Dashboard presentation
+- Testing
 
+### Project Evidence
 
-## The Documentation
+The project contains:
 
+- Lead classification code
+- Lead data
+- Classification rules
+- AI output schema
+- Follow-up agent
+- Dashboard
+- Test results
 
+### Technologies
 
-Each day of the challenge will be documented individually.
+**Python • LLM • Structured Output • Data Processing**
 
+### Limitation
 
+The project uses test/dummy lead data and is intended as a learning project rather than a production CRM system.
 
-- The `01-FOUNDATION/` folder contains notes and the roadmap of what to do.
+---
 
+# 3️⃣ AI Social Media Assistant
 
+**Folder:** `04-PROJECT-3-SOCIAL ASSISTANT`
 
-- The `NOTES/` folder contains what I learned each day.
+### Problem
 
+Turning genuine project experiences into useful social-media content requires writing, review, fact checking, and revision.
 
+### What I Built
 
-- The `02-PROJECT-1-RAG/` folder hosts Project 1.
+A controlled content-generation workflow that transforms project information into social-media drafts and keeps human review in the publishing process.
 
+### Workflow
 
-
-- The `04-PROJECT-2-LEAD AGENT/` folder hosts Project 2.
-
-
-
-- The `04-PROJECT-3-SOCIAL ASSISTANT/` folder hosts Project 3.
-
-
-
-- The `05-PROJECT-4-BUSINESS-AGENT/` folder hosts Project 4.
-
-
-
-## Security
-
-
-
-Do not push real API keys, passwords, access tokens, or other credentials in this or any other repository. If you need to have secrets in your application, use `.env` and `.env.example` files for the safe storage and example of secret environment variables.
-
-
-
-## Goal
-
-
-
-BUILD → TEST → EXPLAIN → SHARE → IMPROVE
+```text
+Content Input
+      ↓
+AI Generation
+      ↓
+Fact Checking
+      ↓
+Revision
+      ↓
+Human Review
+      ↓
+Quality Checks
+      ↓
+Approval
+      ↓
+Manual Publishing

@@ -1,0 +1,70 @@
+PRACTISE
+DAY 29 — PORTFOLIO DAY
+Portfolio Review
+
+Review all four project folders/repos and make sure each project contains:
+
+Problem
+Features
+Architecture
+Setup instructions
+Screenshots / evidence
+Limitations
+Lessons learned
+GitHub Hygiene
+
+Review all four projects for:
+
+Unnecessary files
+Secrets
+API keys
+Passwords
+Credentials
+Private configuration
+Private test data
+
+Use:
+
+git ls-files | Select-String -Pattern '\.env$|secret|password|credential|token|key|private|config'
+
+Also manually review important source and configuration files.
+
+Main Portfolio README
+
+Make sure the main README contains:
+
+Portfolio introduction
+About section
+All four projects
+Project descriptions
+Skills
+Technologies
+Demo / evidence
+Project links
+Project status
+Project / Skills / Demo / Status table
+Independent Visitor Test
+
+Open the portfolio as a new visitor and verify that someone can understand:
+
+What the portfolio is
+What each project does
+Who each project is for
+How each project works
+What technologies were used
+Where the project evidence is
+How to run the projects
+What the limitations are
+What was learned
+Git Review
+
+Review the final repository changes:
+
+git status
+git diff
+
+Make sure only the intended files are included before committing.
+
+Day 29 Outcome
+
+A clean, organized and understandable GitHub portfolio containing four documented AI projects.
